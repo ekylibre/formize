@@ -9,8 +9,8 @@ Jeweler::Tasks.new do |gem|
   gem.name = "yasui_form"
   gem.homepage = "http://github.com/burisu/yasui_form"
   gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.summary = "Simple form DSL with dynamic interactions for Rails"
+  gem.description = "Like simple_form or formtastic, it aims to handle easily forms but taking in account AJAX and HTML5 on depending inputs mainly."
   gem.email = "brice.texier@ekylibre.org"
   gem.authors = ["Brice Texier"]
   # Include your dependencies below. Runtime dependencies are required when using your gem,
@@ -28,6 +28,7 @@ Jeweler::Tasks.new do |gem|
   #  gem.add_runtime_dependency 'jabber4r', '> 0.1'
   #  gem.add_development_dependency 'rspec', '> 1.2.3'
   gem.add_development_dependency "rcov", ">= 0"
+  gem.add_development_dependency "rails", ">= 0"
 end
 Jeweler::RubygemsDotOrgTasks.new
 
