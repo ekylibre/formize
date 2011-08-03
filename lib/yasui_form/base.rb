@@ -4,12 +4,15 @@ module YasuiForm
   # It permits to manage tree of form elements
   class Element
     attr_reader :parent, :children, :method_name
+    @@count = 0
 
-    def initialize(is_method=false)
-      @parent = nil
-      @children = []
-      @method_name = "_run_element_#{self.object_id}"
+    def initialize(parent = nil, is_method = false)
+      @parent = parent
       @is_method = is_method
+      @children = []
+      @@count += 1
+      @id = @@count.to_s(36)
+      @method_name = "_yasui_#{@id}"
     end
 
     def is_method?
@@ -55,60 +58,11 @@ module YasuiForm
 
     protected
 
-
-    def content_tag(markup, *args, &block)
-      options = html_options = {}
-      content = []
-      if block_given?
-        options, html_options = args[0], args[1]
-        yield content
-      else
-        options, html_options = args[1], args[2]
-        content = [args[0].to_s] unless args[0].nil?
-      end
-      varh = options[:html_variable]
-      html_options = {} unless html_options.class == {}.class
-      code = ""
-      if content.size.zero?
-        code << "#{varh} << "+markup_start_code(markup, html_options)+"\n"
-      elsif content.size == 1 and not block_given?
-        code << "#{varh} << "+markup_start_code(markup, html_options, false)+" << #{content} << "+markup_end_code(markup)+"\n"
-      else
-        code << "#{varh} << "+markup_start_code(markup, html_options, false)+"\n"
-        for line in content
-          if block_given?
-            code << line.strip << "\n"
-          else
-            code << "#{varh} << " << line.strip << "\n"
-          end
-        end
-        code << "#{varh} << "+markup_end_code(markup)+"\n"
-      end
-      return code.gsub(/\' \<\< \'/, '') # .gsub(/\'\n\ *#{varh} \<\< \'/, '')
-    end
-
-
     def new_child(klass, *args)
       raise ArgumentError.new("Bad child type (#{klass.name}). Must be an YasuiForm::Element") unless klass < Element
-      element = klass.new(*args)
-      element.send("parent=", self)
+      element = klass.new(self, *args)
       @children << element
       return element
-    end
-
-
-    private
-
-    def markup_start_code(name, attributes={}, closed=true)
-      return "'<#{name}"+attributes.collect{|a, v| " #{a}=\"' << #{v} << '\""}.join+"#{'/' if closed}>'"
-    end
-    
-    def markup_end_code(name)
-      return "'</#{name}>'"
-    end
-    
-    def parent=(my_parent)
-      @parent = my_parent
     end
 
   end
@@ -119,7 +73,7 @@ module YasuiForm
     attr_reader :model, :elements, :record_name
 
     def initialize(model, method_name = nil)
-      super(true)
+      super(nil, true)
       @model = model
       @method_name = method_name unless method_name.blank?
       @record_name = @model.name.underscore
@@ -152,10 +106,11 @@ module YasuiForm
   class FormElement < Element
     attr_reader :form
 
-    def initialize(form, is_method = false)
-      super(is_method)
+    def initialize(parent, form, is_method = false)
+      super(parent, is_method)
       raise ArgumentError.new("Bad form (#{form.class.name}). Must be an YasuiForm::Form") unless form.is_a? YasuiForm::Form
       @form = form
+      @method_name = self.parent.method_name + "_within_" + @id
     end
 
   end
@@ -165,8 +120,8 @@ module YasuiForm
   class FieldSet < FormElement
     attr_reader :name, :options, :title
     
-    def initialize(form, name=nil, options={})
-      super(form, true)
+    def initialize(parent, form, name=nil, options={})
+      super(parent, form, options[:depending_on].is_a?(TrueClass))
       @title = nil
       @name = if name.blank?
                 rand.to_s[2..-1].to_i.to_s(36)
@@ -177,7 +132,7 @@ module YasuiForm
               end
       # raise ArgumentError.new("Every field_set's name must be unique") if @form.methodics.detect{|fs| @name == fs.name}
       @options = (options.is_a?(Hash) ? options : {})
-      @method_name = @form.method_name + "_within_" + @name
+      @method_name = self.parent.method_name + "_within_" + @name
     end
 
 
@@ -191,36 +146,9 @@ module YasuiForm
       self.new_child(Field, @form, name, options)
     end
 
-    # def inner_method_code(variable='html')
-    #   code  = ""
-    #   code << " #{variable} << '<fieldset>'\n"
-    #   unless self.title.nil?
-    #     code << " #{variable} << '<legend>' << ::I18n.translate('labels.#{self.title}') << '</legend>'\n"
-    #   end
-    #   for child in self.children
-    #   end
-
-    #   code << " #{variable} << '</fieldset>'\n"
-    #   return code
-    # end
-
-    def inner_method_code(options={})
-      code = "#{options[:html_variable]} = ''\n"
-      code << content_tag(:fieldset, options) do |c|
-        unless self.title.nil?
-          c << content_tag(:legend, "::I18n.translate('labels.#{self.title}')", options)
-        end
-        for child in self.children
-          c << child.method_call_code(options)
-        end
-      end
-      code << "return #{options[:html_variable]}\n"
-      return code
-    end
-
     def inner_method_code(options={})
       varc = "fieldset_#{@name}"
-      code = "return hard_content_tag(:fieldset) do |#{varc}|\n"
+      code = "hard_content_tag(:fieldset) do |#{varc}|\n"
       unless self.title.nil?
         code << "  #{varc} << content_tag(:legend, ::I18n.translate('labels.#{self.title}'))\n"
       end
@@ -235,11 +163,11 @@ module YasuiForm
 
   # Represents the field element
   class Field < FormElement
-    attr_reader :name, :options, :column, :record_name, :method, :type, :required, :choices, :html_id
+    attr_reader :name, :options, :column, :record_name, :method, :type, :required, :choices, :html_id, :source
     TYPES = [:check_box, :choice, :date, :datetime, :label, :numeric, :password, :single_association_choice, :string, :text_area].freeze
 
-    def initialize(form, name, options={})
-      super(form, false)
+    def initialize(parent, form, name, options={})
+      super(parent, form, false)
       @name = name.to_s
       @options = (options.is_a?(Hash) ? options : {})      
       @column = form.model.columns_hash[method.to_s]
@@ -255,6 +183,17 @@ module YasuiForm
             @type = :choice 
           elsif [Symbol, Hash].include? @choices.class
             @type = :single_association_choice 
+            @reflection = form.model.reflections[@method.to_sym]
+            @source = @options.delete(:source) || @reflection.class_name
+            @is_method = true
+            @method_name = self.parent.method_name + "_within_" + @name
+            @method = @reflection.primary_key_name
+            unless @item_label = @options.delete(:item_label)
+              model = @reflection.class_name.constantize
+              available_methods = (model.columns_hash.keys+model.instance_methods).collect{|x| x.to_s}
+              @item_label = [:label, :name, :code, :number, :inspect].detect{|x| available_methods.include?(x.to_s)}
+            end
+
           else
             raise ArgumentError.new("Option :choices must be Array, Symbol or Hash (got #{options[:choices].class.name})")   
           end
@@ -290,6 +229,9 @@ module YasuiForm
     end
 
     private
+
+
+
 
     def check_box_input(varc)
       return "#{varc} << check_box(:#{self.record_name}, :#{self.method}, #{@options.inspect})\n"
@@ -329,7 +271,7 @@ module YasuiForm
     end
 
     def radio_input(varc)
-      return "#{varc} << " << @choices.collect{|x| "content_tag(:span, radio_button(:#{self.record_name}, :#{self.method}, #{x[1].inspect}) << " " << content_tag(:label, #{x[0].inspect}, :for=>'#{html_id}_#{x[1]}'), :class=>'rad')"}.join(" << ") << "\n"
+      return "#{varc} << " << @choices.collect{|x| "content_tag(:span, radio_button(:#{self.record_name}, :#{self.method}, #{x[1].inspect}) << ' ' << content_tag(:label, #{x[0].inspect}, :for=>'#{html_id}_#{x[1]}'), :class=>'rad')"}.join(" << ") << "\n"
     end
 
     def select_input(varc)
@@ -340,7 +282,6 @@ module YasuiForm
     end
 
     def single_association_choice_input(varc)
-      source = form.model.reflections[@method.to_sym].class_name
       count = "#{@choices}_count"
       code  = "#{count} = #{source}.#{@choices}.count\n"
       code << "if (#{count} <= 10)\n"
@@ -373,15 +314,19 @@ module YasuiForm
     end
 
     def single_association_radio_input(varc)
-      return "#{varc} << RADIO"
+      code  = "for item in #{source}.#{@choices}\n"
+      code << "  #{varc} << content_tag(:span, radio_button(:#{self.record_name}, :#{self.method}, item.id) + ' ' + content_tag(:label, item.#{@item_label}, :for=>'#{html_id}_'+item.id.to_s), :class=>'rad')\n"
+      code << "end\n"
+      return code
     end
 
     def single_association_select_input(varc)
-      return "#{varc} << select(:#{self.record_name}, :#{self.method}, #{source}.#{@choices}.collect{|item| [item.name, item.id]})" # ", options[:options], #{@options.merge('data-refresh'=>url_for(options[:choices].merge(:controller=>:interfacers, :action=>:unroll_options)), 'data-id-parameter-name'=>'selected').inspect} )"
+      
+      return "#{varc} << select(:#{self.record_name}, :#{self.method}, #{source}.#{@choices}.collect{|item| [item.#{@item_label}, item.id]})" # ", options[:options], #{@options.merge('data-refresh'=>url_for(options[:choices].merge(:controller=>:interfacers, :action=>:unroll_options)), 'data-id-parameter-name'=>'selected').inspect} )"
     end
     
     def single_association_unroll_input(varc)
-      return "#{varc} << UNROLL"
+      return "#{varc} << unroll(:#{self.record_name}, :#{self.method}, #{source}.#{@choices}.collect{|item| [item.#{@item_label}, item.id]})" # ", options[:options], #{@options.merge('data-refresh'=>url_for(options[:choices].merge(:controller=>:interfacers, :action=>:unroll_options)), 'data-id-parameter-name'=>'selected').inspect} )"
     end
 
     def string_input(varc)

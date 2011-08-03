@@ -22,6 +22,7 @@ module YasuiForm
 
         file, line = caller[0].split(/\:/)[0..1]
         method_name = "_run_" << __method__.to_s << "_" << record_name.to_s << "_in_" << file.gsub(Rails.root, '').gsub(/(^[\\\/]+|[\\\/]+$)/, '').gsub(/\W/){|c| c[0].to_s} << "_at_" << line
+        
 
         # Compile method if not already done
         #unless YasuiForm::CompiledForms.respond_to?(method_name)

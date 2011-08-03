@@ -11,7 +11,7 @@ Jeweler::Tasks.new do |gem|
   gem.homepage = "http://github.com/burisu/yasui_form"
   gem.license = "MIT"
   gem.summary = "Simple form DSL with dynamic interactions for Rails"
-  gem.description = "Like simple_form or formtastic, it aims to handle easily forms but taking in account AJAX and HTML5 on depending inputs mainly."
+  gem.description = "Like simple_form or formtastic, it aims to handle easily forms but taking in account AJAX and HTML5 on depending fields mainly."
   gem.email = "brice.texier@ekylibre.org"
   gem.authors = ["Brice Texier"]
   # Include your dependencies below. Runtime dependencies are required when using your gem,
