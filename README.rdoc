@@ -14,13 +14,13 @@ It's not necessary, but I recommend to use HAML with it for cleaner views:
 
 YasuiForm was designed to build dynamic forms with no special partials. Therefore, it has got controllers and views helpers.
 
-  =yasui_form_for(@stock) do |f|
-    =f.field_set(:general) do
-      =f.choice(:product_id, :stockable_products)
-      =f.inputs_depending_on(:product_id) do
-        =f.input(:unit_id,     :choices=>{:record=>product, :reflection=>:units})
-        =f.input(:tracking_id, :choices=>{:record=>product, :reflection=>:trackings, :include_blank=>true})
-      =f.input(:warehouse_id)
+  =yasui_form_for(@stock) do |y|
+    -y.field_set(:general) do |f|
+      -f.field :product, :choices=>:stockable_products, :source=>'@current_company'
+    -y.field_set(:product_options, :depend_on=>:product) do |f|
+      -f.field :unit, :choices=>{:record=>product, :reflection=>:units}
+      -f.field :tracking, :choices=>{:record=>product, :reflection=>:trackings, :include_blank=>true}
+    -y.field :warehouse, :choices=>:available_warehouses, :source=>'@current_company'
 
 == Contributing to YasuiForm
  
