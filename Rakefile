@@ -7,8 +7,8 @@ gem 'rake', '0.8.7'
 require 'jeweler'
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
-  gem.name = "yasui_form"
-  gem.homepage = "http://github.com/burisu/yasui_form"
+  gem.name = "formize"
+  gem.homepage = "http://github.com/burisu/formize"
   gem.license = "MIT"
   gem.summary = "Simple form DSL with dynamic interactions for Rails"
   gem.description = "Like simple_form or formtastic, it aims to handle easily forms but taking in account AJAX and HTML5 on depending fields mainly."
@@ -54,7 +54,7 @@ require 'rake/rdoctask'
 Rake::RDocTask.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "YasuiForm #{version}"
+  rdoc.title = "Formize #{version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end

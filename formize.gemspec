@@ -4,7 +4,7 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{yasui_form}
+  s.name = %q{formize}
   s.version = "0.0.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
@@ -22,13 +22,13 @@ Gem::Specification.new do |s|
     "README.rdoc",
     "Rakefile",
     "VERSION",
-    "lib/yasui_form.rb",
-    "lib/yasui_form/action_view/form_helper.rb",
+    "lib/formize.rb",
+    "lib/formize/action_view/form_helper.rb",
     "test/helper.rb",
-    "test/test_yasui_form.rb",
-    "yasui_form.gemspec"
+    "test/test_formize.rb",
+    "formize.gemspec"
   ]
-  s.homepage = %q{http://github.com/burisu/yasui_form}
+  s.homepage = %q{http://github.com/burisu/formize}
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.7}

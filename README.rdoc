@@ -1,28 +1,38 @@
-= YasuiForm (易いForm)
+= Formize
 
 Simple form DSL with dynamic interactions for Rails.
 
 == Installation
 
 Add it to your Gemfile:
-  gem "yasui_form"
+  gem "formize"
 
 It's not necessary, but I recommend to use HAML with it for cleaner views:
   gem "haml"
 
 == Usage
 
-YasuiForm was designed to build dynamic forms with no special partials. Therefore, it has got controllers and views helpers.
+In controller:
 
-  =yasui_form_for(@stock) do |y|
-    -y.field_set(:general) do |f|
-      -f.field :product, :choices=>:stockable_products, :source=>'@current_company'
-    -y.field_set(:product_options, :depend_on=>:product) do |f|
-      -f.field :unit, :choices=>{:record=>product, :reflection=>:units}
-      -f.field :tracking, :choices=>{:record=>product, :reflection=>:trackings, :include_blank=>true}
-    -y.field :warehouse, :choices=>:available_warehouses, :source=>'@current_company'
+class DatumController < ApplicationController
+  # Generates default helpers method and a controller method :formize
+  # for a model Data.
+  formize
 
-== Contributing to YasuiForm
+  # Equivalent to previous example but not recommended
+  formize do
+    field :name
+    field_set :access do
+      field :owner
+      field :group
+    end
+  end
+
+  # 
+  formize
+end
+
+== Contributing to Formize
  
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
 * Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it

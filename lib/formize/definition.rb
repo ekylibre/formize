@@ -1,4 +1,4 @@
-module YasuiForm
+module Formize
 
   # Main class for Form definitions
   # It permits to manage tree of form elements
@@ -12,7 +12,7 @@ module YasuiForm
       @children = []
       @@count += 1
       @id = @@count.to_s(36)
-      @method_name = "_yasui_#{@id}"
+      @method_name = "_formize_#{@id}"
     end
 
     def is_method?
@@ -59,7 +59,7 @@ module YasuiForm
     protected
 
     def new_child(klass, *args)
-      raise ArgumentError.new("Bad child type (#{klass.name}). Must be an YasuiForm::Element") unless klass < Element
+      raise ArgumentError.new("Bad child type (#{klass.name}). Must be an Formize::Element") unless klass < Element
       element = klass.new(self, *args)
       @children << element
       return element
@@ -88,7 +88,7 @@ module YasuiForm
     def field(name, options={})
       self.new_child(Field, self, name, options)
     end
-
+    
     def inner_method_code(options={})
       varh = options[:html_variable]
       code = "#{varh} = ''\n"
@@ -108,7 +108,7 @@ module YasuiForm
 
     def initialize(parent, form, is_method = false)
       super(parent, is_method)
-      raise ArgumentError.new("Bad form (#{form.class.name}). Must be an YasuiForm::Form") unless form.is_a? YasuiForm::Form
+      raise ArgumentError.new("Bad form (#{form.class.name}). Must be an Formize::Form") unless form.is_a? Formize::Form
       @form = form
       @method_name = self.parent.method_name + "_within_" + @id
     end
