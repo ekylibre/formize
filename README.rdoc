@@ -14,23 +14,48 @@ It's not necessary, but I recommend to use HAML with it for cleaner views:
 
 In controller:
 
-class DatumController < ApplicationController
-  # Generates default helpers method and a controller method :formize
-  # for a model Data.
-  formize
+  class OrdersController < ApplicationController
+    # Generates default helpers method and a controller method :formize
+    # for a model Order.
+    formize
 
-  # Equivalent to previous example but not recommended
-  formize do
-    field :name
-    field_set :access do
-      field :owner
-      field :group
+    # Personnalized example
+    formize do
+      field :number
+      field :created_on
+      field :client
+      field_set :addresses, :depend_on=>:client do
+        field :default_contact, :choices=>'DEPENDENCY.contacts'
+        field :delivery_contact, :choices=>'DEPENDENCY.contacts'
+        field :invoice_contact, :choices=>'DEPENDENCY.contacts'
+      end
+      field_set :track do
+        field :responsible
+        field :department
+      end
     end
+
+    # Moreover, with a specified model
+    formize(:lines, :model=>:order_lines)
+
   end
 
-  # 
-  formize
-end
+In views:
+
+  # app/views/orders/_form.html.haml
+  =formize_form
+
+or:
+
+  # app/views/orders/_form.html.haml
+  =form_tag do
+    =formize_fields
+
+or:
+
+  # app/views/orders/_form.html.haml
+  =formize_form :lines
+
 
 == Contributing to Formize
  
