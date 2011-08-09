@@ -19,41 +19,6 @@ module Formize
       self.send("_#{options[:controller]||self.controller_name}_#{__method__}_#{name||self.controller_name}_tag")
     end
 
-
-    # def formize_for(record, options, &block)
-    #   return ""
-    # end
-
-    # def formize_fields_for(record_or_name_or_array, *args, &block)
-    #   raise ArgumentError, "Missing block" unless block_given?
-    #   options = args.extract_options!
-    
-    #   case record_or_name_or_array
-    #   when String, Symbol
-    #     record_name = record_or_name_or_array
-    #     record_object = args.first
-    #   else
-    #     record_object = record_or_name_or_array
-    #     record_name = ActionController::RecordIdentifier.singular_class_name(record_object)
-    #   end
-
-    #   file, line = caller[0].split(/\:/)[0..1]
-    #   method_name = "_run_" << __method__.to_s << "_" << record_name.to_s << "_in_" << file.gsub(Rails.root, '').gsub(/(^[\\\/]+|[\\\/]+$)/, '').gsub(/\W/){|c| c[0].to_s} << "_at_" << line
-    
-
-    #   # Compile method if not already done
-    #   #unless Formize::CompiledForms.respond_to?(method_name)
-    #   #  Formize::Compiler.compile_fields_for(method_name, record_name, options, &block)
-    #   #end
-    #   Formize::Compiler.compile_fields_for(method_name, record_name, options, &block)
-
-    #   # Test evaluation of method
-    #   raise Exception.new("Undefined method " << method_name.inspect) unless Formize::CompiledForms.respond_to?(method_name)
-
-    #   return Formize::CompiledForms.send(method_name, record_object, self)
-    # end
-
-
     # Permits to use content_tag in helpers with easy add
     def hard_content_tag(name, options={}, escape=true, &block)
       content = ''
@@ -61,26 +26,30 @@ module Formize
       return content_tag(name, content, options, escape)
     end
 
-
     # Returns a list of radio buttons for specified attribute (identified by +method+)
-    # on an object assigned to the template (identified by +object+). It works like +select+
-    def radio(object, method, choices, options = {}, html_options = {})
+    # on an object assigned to the template (identified by +object_name+). It works like +select+
+    def radio(object_name, method, choices, options = {}, html_options = {})
       html = ""
       html_options[:class] ||= :rad
       for choice in choices
-        html << content_tag(:span, radio_button(object, method, choice[1]) + '&nbsp;'.html_safe + label(object, method, choice[0], :value=>choice[1]), html_options)
+        html << content_tag(:span, radio_button(object_name, method, choice[1]) + '&nbsp;'.html_safe + label(object_name, method, choice[0], :value=>choice[1]), html_options)
       end
       return html
     end
 
-
     # Returns a text field which has the same behavior of +select+ but  with a search 
     # action which permits to find easily in very long lists...
-    def unroll(object, method, choices, options = {}, html_options = {})
+    def unroll(object_name, method, choices, options = {}, html_options = {})
+      object = instance_variable_get("@#{object_name}")
+      label = options[:label]
+      if label.is_a?(String) or label.is_a?(Symbol)
+        label = Proc.new{|x| x.send(label)}
+      elsif !label.is_a?(Proc)
+        label = Proc.new{|x| x.inspect}
+      end
       html  = ""
-      html << hidden_field(object, method)
-      html << text_field_tag(object, method, "data-unroll"=>url_for())
-      html << tag(:div, "data-unroll"=>url_for())
+      html << hidden_field(object_name, method)
+      html << tag(:input, :type=>:text, "data-unroll"=>url_for(choices), "data-value-container"=>"#{object_name}_#{method}", :value=>label.call(object.send(method.to_s.gsub(/_id$/, ''))))
       return content_tag(:span, html, html_options)
     end
 

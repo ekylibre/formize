@@ -15,10 +15,10 @@ module Formize
   configure :default_source, :foreign_class
 
   # How many radio can be displayed before to become a +select+
-  configure :radio_count_max, 7
+  configure :radio_count_max, 3
 
   # How many select options can be displayed before to become a +unroll+
-  configure :select_count_max, 7*7
+  configure :select_count_max, 7
 
 end
 

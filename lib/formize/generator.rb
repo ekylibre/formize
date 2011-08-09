@@ -30,9 +30,9 @@ module Formize
       # Mono_choice search/filter
       items = form.mono_choices
       if items.size > 0
-        code << "  if params[:search]\n"
+        code << "  if params[:unroll]\n"
         events = form.mono_choices.collect do |mono_choice|
-          event = "if params[:field] == '#{mono_choice.id}'\n"
+          event = "if params[:unroll] == '#{mono_choice.html_id}'\n"
           # event << mono_choice_search_code(mono_choice)
           event << "end\n"
         end
@@ -394,7 +394,9 @@ module Formize
     end
     
     def field_mono_unroll_input(field, attrs={}, varc='varc')
-      return "#{varc} << unroll(:#{field.record_name}, :#{field.method}, #{field_datasource(field)}.collect{|item| [item.#{field.item_label}, item.id]}, {}, #{attrs.inspect})"
+      options = {}
+      options[:label] ||= Code.new("Proc.new{|r| \"#{mono_choice_label(field, 'r')}\"}")
+      return "#{varc} << unroll(:#{field.record_name}, :#{field.method}, url_for(:controller=>:#{controller.controller_name}, :action=>:#{form.action_name}, :unroll=>:#{field.html_id}), #{options.inspect}, #{attrs.inspect})"
     end
 
     def field_string_input(field, attrs={}, varc='varc')
@@ -434,6 +436,11 @@ module Formize
       else
         value.to_s
       end
+    end
+
+    
+    def mono_choice_label(choice, varr='record')
+      return "\#\{#{varr}.#{choice.item_label}\}"
     end
 
 

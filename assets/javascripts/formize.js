@@ -15,7 +15,7 @@ Formize.Overlay = {
             body.appendChild(overlay);
 	}
         this.count += 1;
-	overlay.setStyle({'z-index': this.z_index});
+	overlay.setStyle({'z-index': this.z_index()});
         return overlay;
     },
     
@@ -26,7 +26,7 @@ Formize.Overlay = {
             if (this.count <= 0) {
 		overlay.remove();
 	    } else {
-		overlay.setStyle({'z-index': this.z_index});
+		overlay.setStyle({'z-index': this.z_index()});
 	    }
         }
         return this.count;
@@ -57,7 +57,7 @@ Formize.Dialog = {
             parameters: {dialog: dialog_id},
             evalScripts: true,
             onSuccess: function(response) {
-                var dialog = new Element('div', {id: dialog_id, 'data-ratio': ratio, 'data-dialog-update': updated, flex: '1', 'class': 'dialog', style: 'z-index:'+(Formize.Overlay.z_index+1)+'; position:fixed; opacity: 1'});
+                var dialog = new Element('div', {id: dialog_id, 'data-ratio': ratio, 'data-dialog-update': updated, flex: '1', 'class': 'dialog', style: 'z-index:'+(Formize.Overlay.z_index()+1)+'; position:fixed; opacity: 1'});
                 body.appendChild(dialog);
                 dialog.update(response.responseText);
                 var w = ratio*width;
@@ -162,6 +162,40 @@ Formize.Partials = {
         });
         event.stop();
         return false;
+    },
+
+    uniqueID: function() {
+	var uid = 'u'+((new Date()).getTime() + "" + Math.floor(Math.random() * 1000000)).substr(0, 18);
+	return uid;
+    },
+
+    initializeUnroll: function(element) {
+	var choices;
+	choices = element.readAttribute('data-choices-container');
+	//alert(choices);
+	if (choices === null) {
+	    choices = new Element('div', {
+		'id': this.uniqueID(),
+		'class': "unroll-choices",
+		'style': "display: none"
+	    });
+	    element.insert({after: choices});
+	    element.writeAttribute('data-choices-container', choices.id);
+	}
+
+	element.unroll_cache = element.value;
+	element.value_field = $(element.readAttribute('data-value-container'));
+	if (element.value_field === null) {
+	    alert('An input '+element.id+' with a "data-unroll" attribute must contain a "data-value-container" attribute');
+	}
+	
+	new Ajax.AutoCompleter(element, choices, element.readAttribute('data-unroll'), {
+	    afterUpdateElement: function(element, selected) {
+		var model_id = /(\d+)$/.exec(value.id)[1];
+		element.value_field.value = model_id;
+		element.unroll_cache = element.value;
+            }
+	});
     }
 
 };
@@ -170,8 +204,10 @@ Formize.Partials = {
 (function() {
     "use strict";
 
+    // Refreshes dependent elements
     document.on("change", "*[data-dependents]", Formize.Partials.refresh);
 
+    // Opens a dialog for a ressource creation
     document.on("click", "a[data-add-item]", function(event, element) {
         var list_id = element.readAttribute('data-add-item');
         var url = element.readAttribute('href');
@@ -179,17 +215,54 @@ Formize.Partials = {
         event.stop();
     });
 
+    // Closes a dialog
     document.on("click", "a[data-close-dialog]", function(event, element) {
         var dialog_id = element.readAttribute('data-close-dialog');
         Formize.Dialog.close(dialog_id);
         event.stop();
     });
 
-
+    // Submits dialog forms
     document.on("submit", "form[data-dialog]", Formize.Partials.submitDialogForm);
+
+    // Manage unroll
+    // this is the only found way to work with dom:loaded
+    Event.observe(window, "dom:loaded", function(event) {
+	$$('input[data-unroll]').each(function(element) {
+	    Formize.Partials.initializeUnroll(element);
+	});
+    });
+
+    document.on("focus", "input[data-unroll]", function(event, element) {
+	if (element.unroll_cache === undefined) {
+	    element.unroll_cache = element.value;
+	}
+    });
+
+    document.on("change", "input[data-unroll]", function(event, element) {
+        window.setTimeout(function () {
+	    if (1) {
+		if (this.value != this.unroll_cache) { 
+		    this.value_field.value = ''; 
+		}
+	    } else {
+		this.value = this.unroll_cache;
+	    }
+	}.bind(element), 200);
+    });
+
+    document.on("keypress", "input[data-unroll]", function(event, element) {
+	if (event.keyCode === Event.KEY_RETURN) {
+	    event.stop();
+	    return false;
+	} else {
+	    return true;
+	}
+    });
 
 })();
 
+ 
 
 
 /*
