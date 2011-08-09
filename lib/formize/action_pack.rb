@@ -8,53 +8,52 @@ module Formize
     
     module ClassMethods
 
-      def formize(model=nil, &block)
-        model ||= self.controller_name.to_s.singularize
-        model = model.classify.constantize
-        form = Formize::Form.new(model)
+      # Generates controller and view method working together
+      # This methods allows to develop dynamic forms without using partials
+      # and another action, only formize or formize_*.
+      def formize(*args, &block)
+        name, options = nil, {}
+        name = args[0] if args[0].is_a? Symbol
+        options = args[-1] if args[-1].is_a? Hash
+        name ||= self.controller_name.to_sym
+        model = (options[:model]||name).to_s.classify.constantize
+        options[:controller_method_name] = "formize#{'_'+name.to_s if name != self.controller_name.to_sym}"
+        options[:view_form_method_name]   = "_#{self.controller_name}_formize_form_#{name}_tag"
+        options[:view_fields_method_name] = "_#{self.controller_name}_formize_fields_#{name}_tag"
+        options[:method_name] = options[:view_fields_method_name]
+        form = Formize::Form.new(name, model, options)
         if block_given?
           yield form
         else
-          form.field_set do |f|
-            for column in model.columns
-              next if column.name =~ /_count$/
-              if column.name =~ /_id$/
-                reflections = model.reflection.select{|x| x.primary_key_name.to_s == column.name.to_s }
-                if reflections.size == 1
-                  f.field(column.name.gsub(/_id$/, ''))
-                  # elsif reflections.size > 1 # AMBIGUITY
-                  # elsif reflections.size < 1 # NOTHING
-                end
-              else
-                f.field(column.name)
+          formize_by_default(form)
+        end
+        generator = Formize::Generator.new(form, self)
+        class_eval(generator.controller_code, "#{__FILE__}:#{__LINE__}")
+        ActionView::Base.send(:class_eval, generator.view_code, "#{__FILE__}:#{__LINE__}")
+      end
+
+      private
+
+      # Generates list of usable field 
+      def formize_by_default(form)
+        form.field_set do |f|
+          for column in model.columns
+            next if column.name =~ /_count$/
+            if column.name =~ /_id$/
+              reflections = model.reflection.select{|x| x.primary_key_name.to_s == column.name.to_s }
+              if reflections.size == 1
+                f.field(column.name.gsub(/_id$/, ''))
+                # elsif reflections.size > 1 # AMBIGUITY
+                # elsif reflections.size < 1 # NOTHING
               end
+            else
+              f.field(column.name)
             end
           end
         end
-
-        class_eval(form.send(:generate_controller_method_code), __FILE__, __LINE__)
-        ActionView::Base.send(:class_eval, form.send(:generate_view_methods_code), __FILE__, __LINE__)
+        return form
       end
 
-    end
-
-  end
-
-
-  module ViewsHelper
-
-    def formize_form(*args)
-      name, options = nil, {}
-      name = args[0] if args[0].is_a? Symbol
-      options = args[-1] if args[-1].is_a? Hash
-      self.send("_#{options[:controller]||self.controller_name}_#{__method__}_#{name||self.controller_name}_tag")
-    end
-
-    def formize_fields(*args)
-      name, options = nil, {}
-      name = args[0] if args[0].is_a? Symbol
-      options = args[-1] if args[-1].is_a? Hash
-      self.send("_#{options[:controller]||self.controller_name}_#{__method__}_#{name||self.controller_name}_tag")
     end
 
   end
@@ -62,4 +61,3 @@ module Formize
 end
 
 ActionController::Base.send(:include, Formize::ActionController)
-ActionView::Base.send(:include, Formize::ViewsHelper)
