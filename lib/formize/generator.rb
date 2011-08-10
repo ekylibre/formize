@@ -33,7 +33,14 @@ module Formize
         code << "  if params[:unroll]\n"
         events = form.mono_choices.collect do |mono_choice|
           event = "if params[:unroll] == '#{mono_choice.html_id}'\n"
-          # event << mono_choice_search_code(mono_choice)
+
+          for depended in mono_choice.dependeds
+            df = form.fields[depended[:name]]
+            event << "  #{df.name} = " << (df.reflection.nil? ? "params[:#{df.input_id}]" : "#{df.reflection.class_name}.find_by_id(params[:#{df.input_id}])") << "\n"
+            # locals[df.name.to_sym] = Code.new(df.name)
+          end
+
+          event << mono_choice_search_code(mono_choice).strip.gsub(/^/, '  ') << "\n"
           event << "end\n"
         end
         code << events.collect{|e| e.gsub(/^/, '    ')}.join
@@ -52,8 +59,8 @@ module Formize
           locals = {record_name.to_sym => Code.new(record_name)}
           for depended in dependent.dependeds
             df = form.fields[depended[:name]]
-            event << "  #{df.name} = " << (df.reflection.nil? ? "params[:#{df.input_id}]" : "#{df.reflection.class_name}.find(params[:#{df.input_id}])") << "\n"
-            locals[df.name.to_sym] = Code.new(df.name)
+            event << "  #{record_name}.#{df.name} = " << (df.reflection.nil? ? "params[:#{df.input_id}]" : "#{df.reflection.class_name}.find_by_id(params[:#{df.input_id}])") << "\n"
+            # locals[df.name.to_sym] = Code.new(df.name)
           end
           event << "  render(:inline=>'<%=#{dependent.prototype}-%>', :locals=>#{locals.inspect})\n"
           event << "end\n"
@@ -113,12 +120,70 @@ module Formize
 
 
     
+    def view_partial_code(element, varh='varh')
+      # send("#{element.class.name.split('::')[-1].underscore}_#{__method__}", element, varh)
+      special_method = "#{element.class.name.split('::')[-1].underscore}_#{__method__}".to_sym
+      code = ""
+      partial_code = send(special_method, element, varh)
+      dependeds = element.dependeds.collect{|d| d[:name]}
+      if dependeds.size > 0
+        for depended in dependeds
+          depended_field = form.fields[depended]
+          code << "#{depended_field.name} = #{form.record_name}.#{depended_field.name}\n"
+          if depended_field.reflection
+            code << "#{depended_field.name} ||= #{field_datasource(depended_field)}.first\n"
+          end
+        end
+
+        code << "if #{dependeds.join(' and ')}\n"
+
+        code << partial_code.strip.gsub(/^/, '  ') << "\n"
+
+        code << "else\n"
+        code << "  #{varh} << content_tag(:div, '', #{wrapper_attrs(element).inspect})\n"
+        code << "end\n"
+      else
+        code = partial_code
+      end
+      return code
+    end
+
     def view_method_code(element, varh='varh')
-      send("#{element.class.name.split('::')[-1].underscore}_view_method_code", element, varh)
+      # send("#{element.class.name.split('::')[-1].underscore}_#{__method__}", element, varh)
+      special_method = "#{element.class.name.split('::')[-1].underscore}_#{__method__}".to_sym
+      return send(special_method, element, varh) if self.respond_to?(special_method)
+      code  = "def #{element.prototype}\n"
+      code << "  #{varh} = ''\n"
+      code << view_partial_code(element, varh).strip.gsub(/^/, '  ') << "\n"
+      code << "  return #{varh}\n"
+      code << "end\n"
+      return code
     end
 
     def view_method_call(element, varh='varh')
-      send("#{element.class.name.split('::')[-1].underscore}_view_method_call", element, varh)
+      special_method = "#{element.class.name.split('::')[-1].underscore}_#{__method__}".to_sym
+      return send(special_method, element, varh) if self.respond_to?(special_method)
+      if @partials.include?(element)
+        return "#{varh} << #{element.prototype}\n"
+      else
+        return view_partial_code(element, varh).strip << "\n"
+      end
+    end
+
+    def wrapper_attrs(element)
+      html_options = (element.respond_to?(:html_options) ? element.html_options : {})
+      html_options[:id] = element.html_id
+      if @partials.include?(element)
+        url = {:controller => controller.controller_name.to_sym, :action=>form.action_name.to_sym, :refresh=>element.html_id}
+        for depended in element.dependeds
+          df = form.fields[depended[:name]]
+          url[df.input_id.to_sym] = Code.new(df.reflection.nil? ? df.name : "#{df.name}.id")
+        end
+        html_options["data-refresh"] = Code.new("url_for(#{url.inspect})")
+      end
+      special_method = "#{element.class.name.split('::')[-1].underscore}_#{__method__}".to_sym
+      return send(special_method, element, html_options) if self.respond_to?(special_method)      
+      return html_options
     end
 
     #####################################################################################
@@ -127,10 +192,7 @@ module Formize
     
     def field_set_view_partial_code(field_set, varh='varh')
       # Initialize html attributes
-      html_options = field_set.html_options
-      # html_options[:class] = "formize #{html_options[:class]}".strip
-      html_options["id"] = field_set.html_id
-      html_options["data-refresh"] = Code.new("url_for(:controller=>:#{controller.controller_name}, :action=>:#{form.action_name}, :refresh=>'#{field_set.html_id}', :id=>#{record_name}.id)") if @partials.include?(field_set)
+      html_options = wrapper_attrs(field_set)
 
       varc = field_set.html_id # "field_set_#{field_set.html_id}"
       code  = "#{varh} << hard_content_tag(:fieldset, #{html_options.inspect}) do |#{varc}|\n"
@@ -144,74 +206,56 @@ module Formize
       return code
     end
 
-    def field_set_view_method_code(field_set, varh='html')
-      code  = "def #{field_set.prototype}\n"
-      code << "  #{varh} = ''\n"
-      code << field_set_view_partial_code(field_set, varh).strip.gsub(/^/, '  ') << "\n"
-      code << "  return #{varh}\n"
-      code << "end\n"
-      return code
-    end
+    # def field_set_view_method_code(field_set, varh='html')
+    #   code  = "def #{field_set.prototype}\n"
+    #   code << "  #{varh} = ''\n"
+    #   code << field_set_view_partial_code(field_set, varh).strip.gsub(/^/, '  ') << "\n"
+    #   code << "  return #{varh}\n"
+    #   code << "end\n"
+    #   return code
+    # end
 
-    def field_set_view_method_call(field_set, varh='varh')
-      code = ""
-      call = if @partials.include?(field_set)
-               "#{varh} << #{field_set.prototype}\n"
-             else
-               field_set_view_partial_code(field_set, varh).strip << "\n"
-             end
+    # def field_set_view_method_call(field_set, varh='varh')
+    #   code = ""
+    #   call = if @partials.include?(field_set)
+    #            "#{varh} << #{field_set.prototype}\n"
+    #          else
+    #            field_set_view_partial_code(field_set, varh).strip << "\n"
+    #          end
 
-      if field_set.depend_on
-        depended_field = form.fields[field_set.depend_on]
-        code << "#{field_set.depend_on} = #{form.record_name}.#{depended_field.name}\n"
-        if ref = depended_field.reflection
-          code << "#{field_set.depend_on} ||= #{field_datasource(depended_field)}.first\n"
-        end
-        code << "if #{field_set.depend_on}\n"
-        code << call.strip.gsub(/^/, '  ') << "\n"
-        code << "else\n"
-        opt = {:id=>field_set.html_id, :class=>"waiting", "data-refresh"=>Code.new("url_for(:controller=>:#{controller.controller_name}, :action=>:#{form.action_name}, :refresh=>'#{field_set.html_id}')")}
-        code << "  #{varh} << tag(:div, #{opt.inspect})\n"
+    #   if field_set.depend_on
+    #     depended_field = form.fields[field_set.depend_on]
+    #     code << "#{field_set.depend_on} = #{form.record_name}.#{depended_field.name}\n"
+    #     if ref = depended_field.reflection
+    #       code << "#{field_set.depend_on} ||= #{field_datasource(depended_field)}.first\n"
+    #     end
+    #     code << "if #{field_set.depend_on}\n"
+    #     code << call.strip.gsub(/^/, '  ') << "\n"
+    #     code << "else\n"
+    #     opt = {:id=>field_set.html_id, :class=>"waiting", "data-refresh"=>Code.new("url_for(:controller=>:#{controller.controller_name}, :action=>:#{form.action_name}, :refresh=>'#{field_set.html_id}')")}
+    #     code << "  #{varh} << tag(:div, #{opt.inspect})\n"
 
-        code << "end\n"
-      else
-        code = call
-      end
+    #     code << "end\n"
+    #   else
+    #     code = call
+    #   end
 
-      return code
-    end
+    #   return code
+    # end
 
     #####################################################################################
     #                             F I E L D     M E T H O D S                           #
     #####################################################################################
       
-    # varc  = "field_#{field.name}"
-    # code  = ""
-    # # Initialize html attributes
-    # html_options = field.html_options
-    # html_options[:id] = field.html_id
-    # html_options[:class] = "field #{html_options[:class]}".strip
-    # # html_options[:class] = "formize #{html_options[:class]}".strip
-    # html_options[:class] = "#{html_options[:class]} #{field.type.to_s.gsub('_', '-')}".strip
-    # html_options[:class] = "#{html_options[:class]} required".strip if field.required
-    
-    # # Call build method
-    # if @partials.include?(field)
-    #   code << "#{varh} << content_tag(:div, #{field.unique_name}(#{record_name}), #{html_options.inspect})"
-    # else
-    #   code << "#{varh} << hard_content_tag(:div, #{html_options.inspect}) do |#{varc}|\n"
-    #   code << field_view_partial_code(field, varc).strip.gsub(/^/, '  ') << "\n"
-    #   code << "end\n"
-    # end
-    # return code
-
     def field_view_partial_code(field, varh='varh')
-      deps = form.dependents_on(field)
       input_attrs = (field.options[:input_options].is_a?(Hash) ? field.options[:input_options] : {})
-      input_attrs["data-dependents"] = deps.collect{|d| d.html_id}.join(',') if deps.size > 0
+      deps = form.dependents_on(field)
+      if deps.size > 0
+        input_attrs["data-dependents"] = deps.collect{|d| d.html_id}.join(',') 
+      end
 
       # Initialize html attributes
-      html_options = field_wrapper_attrs(field)
+      html_options = wrapper_attrs(field)
 
       varc = field.html_id
       code  = "#{varh} << hard_content_tag(:div, #{html_options.inspect}) do |#{varc}|\n"
@@ -222,68 +266,73 @@ module Formize
       return code
     end
 
-    def field_view_method_code(field, varh='html')
-      code  = "def #{field.prototype}\n"
-      code << "  #{varh} = ''\n"
-      code << field_view_partial_code(field, varh).strip.gsub(/^/, '  ') << "\n"
-      code << "  return #{varh}\n"
-      code << "end\n"
-      return code
-    end
+    # def field_view_method_code(field, varh='html')
+    #   code  = "def #{field.prototype}\n"
+    #   code << "  #{varh} = ''\n"
+    #   code << field_view_partial_code(field, varh).strip.gsub(/^/, '  ') << "\n"
+    #   code << "  return #{varh}\n"
+    #   code << "end\n"
+    #   return code
+    # end
 
-    def field_view_method_call(field, varh='varh')
-      code = ""
-      call = if @partials.include?(field)
-               "#{varh} << #{field.prototype}\n"
-             else
-               field_view_partial_code(field, varh).strip << "\n"
-             end
+    # def field_view_method_call(field, varh='varh')
+    #   code = ""
+    #   call = if @partials.include?(field)
+    #            "#{varh} << #{field.prototype}\n"
+    #          else
+    #            field_view_partial_code(field, varh).strip << "\n"
+    #          end
 
-      if field.depend_on
-        depended_field = form.fields[field.depend_on]
-        code << "#{field.depend_on} = #{form.record_name}.#{depended_field.name}\n"
-        code << "if #{field.depend_on}\n"
-        code << call.strip.gsub(/^/, '  ') << "\n"
-        code << "else\n"
-        attrs = field_wrapper_attrs(field)
-        attrs[:class] = "#{attrs[:class]} waiting".strip
-        code << "  #{varh} << tag(:div, #{attrs.inspect})\n"
-        code << "end\n"
-      else
-        code = call
-      end
+    #   if field.depend_on
+    #     depended_field = form.fields[field.depend_on]
+    #     code << "#{field.depend_on} = #{form.record_name}.#{depended_field.name}\n"
+    #     code << "if #{field.depend_on}\n"
+    #     code << call.strip.gsub(/^/, '  ') << "\n"
+    #     code << "else\n"
+    #     attrs = field_wrapper_attrs(field)
+    #     attrs[:class] = "#{attrs[:class]} waiting".strip
+    #     code << "  #{varh} << tag(:div, #{attrs.inspect})\n"
+    #     code << "end\n"
+    #   else
+    #     code = call
+    #   end
 
-      return code
-    end
+    #   return code
+    # end
 
 
     def field_datasource(field)
-      source = if !field.source.blank?
-                 field.source
-               elsif Formize.default_source == :foreign_class
-                 field.reflection.class_name
-               elsif Formize.default_source == :class
-                 form.model.name
-               else
-                 Formize.default_source.to_s
-               end
-      return "#{source}.#{field.choices}"
+      source = field.source
+      source = Formize.default_source unless [Array, String, Symbol].include?(source.class)
+      if source.is_a?(Array)
+        return "#{source[0]}.#{field.choices}"
+      elsif source == :foreign_class
+        return "#{field.reflection.class_name}.#{field.choices}"
+      elsif source == :class
+        return "#{form.model.name}.#{field.choices}"
+      else
+        return "#{source}.#{field.choices}"
+      end
+    end
+    
+    def field_datasource_class_name(field)
+      source = field.source
+      source = Formize.default_source unless [Array, String, Symbol].include?(source.class)
+      if source.is_a?(Array)
+        return source[1]
+      elsif source == :foreign_class
+        return field.reflection.class_name
+      elsif source == :class
+        return form.model.name
+      else
+        return source.to_s.classify
+      end
     end
     
     def field_input_options(field)
     end
 
-    def field_wrapper_attrs(field)
-      html_options = field.html_options
-      html_options[:id] = field.html_id
-      if @partials.include?(field)
-        url = {:controller => controller.controller_name.to_sym, :action=>form.action_name.to_sym, :refresh=>field.html_id}
-        for depended in field.dependeds
-          df = form.fields[depended[:name]]
-          url[df.input_id.to_sym] = Code.new(df.reflection.nil? ? df.name : "#{df.name}.id")
-        end
-        html_options["data-refresh"] = Code.new("url_for(#{url.inspect})")
-      end
+    def field_wrapper_attrs(field, html_options={})
       html_options[:class] = "field #{html_options[:class]}".strip
       html_options[:class] = "#{html_options[:class]} #{field.type.to_s.gsub('_', '-')}".strip
       html_options[:class] = "#{html_options[:class]} required".strip if field.required
@@ -337,13 +386,18 @@ module Formize
     end
 
     def field_select_input(field, attrs={}, varc='varc')
-      if (include_blank = field.options.delete(:include_blank)).is_a? String
+      if (include_blank = attrs.delete(:include_blank)).is_a? String
         field.choices.insert(0, [include_blank, ''])
       end
       return "#{varc} << select(:#{field.record_name}, :#{field.method}), #{field.choices.inspect}, #{attrs.inspect})\n"
     end
 
     def field_mono_choice_input(field, attrs={}, varc='varc')
+      source_model = field_datasource_class_name(field).constantize
+      reflection = source_model.reflections[field.choices]
+      if reflection.nil?
+        raise Exception.new("#{source_model.name} must have a reflection :#{field.choices}.")
+      end
       count = "#{field.choices}_count"
       select_first_if_empty = "  #{record_name}.#{field.name} ||= #{field_datasource(field)}.first\n"
       code  = "#{count} = #{field_datasource(field)}.count\n"
@@ -352,12 +406,18 @@ module Formize
       code << "elsif (#{count} <= #{Formize.radio_count_max})\n"
       code << select_first_if_empty
       code << field_mono_radio_input(field, attrs, varc).strip.gsub(/^/, '  ') << "\n"
-      code << "elsif (#{count} <= #{Formize.select_count_max})\n"
-      code << select_first_if_empty
-      code << field_mono_select_input(field, attrs, varc).strip.gsub(/^/, '  ') << "\n"
-      code << "else\n"
-      code << select_first_if_empty
-      code << field_mono_unroll_input(field, attrs, varc).strip.gsub(/^/, '  ') << "\n"
+      if reflection.options[:finder_sql].nil?
+        code << "elsif (#{count} <= #{Formize.select_count_max})\n"
+        code << select_first_if_empty
+        code << field_mono_select_input(field, attrs, varc).strip.gsub(/^/, '  ') << "\n"
+        code << "else\n"
+        code << select_first_if_empty
+        code << field_mono_unroll_input(field, attrs, varc).strip.gsub(/^/, '  ') << "\n"
+      else
+        code << "else\n"
+        code << select_first_if_empty
+        code << field_mono_select_input(field, attrs, varc).strip.gsub(/^/, '  ') << "\n"
+      end
       code << "end\n"
       
       new_item_url = field.options.delete(:new)
@@ -396,7 +456,12 @@ module Formize
     def field_mono_unroll_input(field, attrs={}, varc='varc')
       options = {}
       options[:label] ||= Code.new("Proc.new{|r| \"#{mono_choice_label(field, 'r')}\"}")
-      return "#{varc} << unroll(:#{field.record_name}, :#{field.method}, url_for(:controller=>:#{controller.controller_name}, :action=>:#{form.action_name}, :unroll=>:#{field.html_id}), #{options.inspect}, #{attrs.inspect})"
+      url = {:controller=>controller.controller_name, :action=>form.action_name, :unroll=>field.html_id}
+      for depended in field.dependeds
+        df = form.fields[depended[:name]]
+        url[df.input_id.to_sym] = Code.new(df.reflection.nil? ? df.name : "#{df.name}.id")
+      end
+      return "#{varc} << unroll(:#{field.record_name}, :#{field.method}, url_for(#{url.inspect}), #{options.inspect}, #{attrs.inspect})"
     end
 
     def field_string_input(field, attrs={}, varc='varc')
@@ -443,10 +508,17 @@ module Formize
       return "\#\{#{varr}.#{choice.item_label}\}"
     end
 
-
-    def mono_choice_search_code(choice)
-      model = (options[:model]||name_db).to_s.singularize.camelize.constantize
-      attributes = choice.search_attributes
+    def mono_choice_search_code(field)
+      source_model = field_datasource_class_name(field).constantize
+      reflection = source_model.reflections[field.choices]
+      if reflection.nil?
+        raise Exception.new("#{source_model.name} must have a reflection :#{field.choices}.")
+      end
+      model = reflection.class_name.constantize
+      foreign_record  = model.name.underscore
+      foreign_records = "#{source_model.name.underscore}_#{field.choices}"
+      options = field.options
+      attributes = field.search_attributes
       attributes = [attributes] unless attributes.is_a? Array
       attributes_hash = {}
       attributes.each_index do |i|
@@ -477,58 +549,45 @@ module Formize
         end
       end
       
-      method_name = name_db.to_s+'_dyli'
-      
       select = (model.table_name+".id AS id, "+attributes_hash.collect{|k,v| v+" AS "+k}.join(", ")).inspect
       joins = options[:joins] ? ", :joins=>"+options[:joins].inspect : ""
       
       code  = ""
-      code += "conditions = [#{query.join(' AND ').inspect+parameters}]\n"
-      code += "if params[:id]\n"
-      code += "  conditions[0] += '#{' AND ' if query.size>0}#{model.table_name}.id=?'\n"
-      code += "  conditions << params[:id]\n"
-      code += "  record = "+model.name.to_s+".find(:first, :select=>#{select}, :conditions=>conditions#{joins})\n"
-      code += "  if record\n"
-      code += "    render :json=>{:tf_value=>"+attributes.collect{|key| "record.#{key[2]}.to_s"}.join('+", "+')+", :hf_value=>record.id}\n"
-      code += "  else\n"
-      code += "    render :text=>''\n"
-      code += "  end\n"
-      code += "else\n"
-      code += "  search = params[:#{name_db}][:search]||\"\"\n"
-      code += "  words = search.lower.split(/[\\s\\,]+/)\n"
-      code += "  if words.size>0\n"
-      code += "    conditions[0] += '#{' AND ' if query.size>0}('\n"
-      code += "    words.each_index do |index|\n"
-      code += "      word = words[index]\n"
-      code += "      conditions[0] += ') AND (' if index>0\n"
+      code << "conditions = [#{query.join(' AND ').inspect+parameters}]\n"
+      code << "search = params[:search]\n"
+      code << "words = search.lower.split(/[\\s\\,]+/)\n"
+      code << "if words.size > 0\n"
+      code << "  conditions[0] << '#{' AND ' if query.size>0}('\n"
+      code << "  words.each_index do |index|\n"
+      code << "    word = words[index].to_s\n"
+      code << "    conditions[0] << ') AND (' if index > 0\n"
 
       if ActiveRecord::Base.connection.adapter_name == "MySQL"
-        code += "      conditions[0] += "+attributes.collect{|key| "LOWER(CAST(#{key[0]} AS CHAR)) LIKE ?"}.join(' OR ').inspect+"\n"
+        code << "    conditions[0] << "+attributes.collect{|key| "LOWER(CAST(#{key[0]} AS CHAR)) LIKE ?"}.join(' OR ').inspect+"\n"
       else
-        code += "      conditions[0] += "+attributes.collect{|key| "LOWER(CAST(#{key[0]} AS VARCHAR)) LIKE ?"}.join(' OR ').inspect+"\n"
+        code << "    conditions[0] << "+attributes.collect{|key| "LOWER(CAST(#{key[0]} AS VARCHAR)) LIKE ?"}.join(' OR ').inspect+"\n"
       end
 
-      # code += "      conditions[0] += "+attributes.collect{|key| "LOWER(#{key[0]}) LIKE ?"}.join(' OR ').inspect+"\n"
-      code += "      conditions += ["+attributes.collect{|key| key[1].inspect.gsub('X', '"+words[index].to_s+"').gsub(/(^\"\"\+|\+\"\"\+|\+\"\")/, '')}.join(", ")+"]\n"
-      code += "    end\n"
-      code += "    conditions[0] += ')'\n"
-      code += "  end\n"
+      code << "    conditions += ["+attributes.collect{|key| key[1].inspect.gsub('X', '"+word+"').gsub(/(^\"\"\+|\+\"\"\+|\+\"\")/, '')}.join(", ")+"]\n"
+      code << "  end\n"
+      code << "  conditions[0] << ')'\n"
+      code << "end\n"
       order = ", :order=>"+attributes.collect{|key| "#{key[0]} ASC"}.join(', ').inspect
       limit = ", :limit=>"+(options[:limit]||12).to_s
       partial = options[:partial]
-      code += "  list = ''\n"
-      code += "  for record in "+model.name.to_s+".find(:all, :select=>#{select}, :conditions=>conditions"+joins+order+limit+")\n"
-      code += "    content = "+attributes.collect{|key| "record.#{key[2]}.to_s"}.join('+", "+')+"\n"
-      display = (partial ? "render(:partial=>"+partial.inspect+", :locals =>{:record=>record, :content=>content, :search=>search})" : 'highlight(#{content.inspect}, #{search.inspect})')
-      code += "    list += \"<li id=\\\"#{name_db}_\#\{record.id\}\\\"><%=#{display}%><input type=\\\"hidden\\\" value=\#\{content.inspect\} id=\\\"record_\#\{record.id\}\\\"/></li>\"\n"
-      code += "  end\n"
-      code += "  render :inline=>'<ul>'+list+'</ul>'\n"
-      code += "else\n"
-      code += "  render :text=>'', :layout=>true\n"
-      code += "end #123\n"
 
-      # File.open("/tmp/test.rb", "wb") {|f| f.write(code)}
-      # list = code.split("\n"); list.each_index{|x| puts((x+1).to_s.rjust(4)+": "+list[x])}
+      html  = "<ul><%for #{foreign_record} in #{foreign_records}-%><li id='<%=#{foreign_record}.id-%>'>" 
+      html << "<%content=#{foreign_record}.#{field.item_label}-%>"
+      # html << "<%content="+attributes.collect{|key| "#{foreign_record}['#{key[2]}'].to_s"}.join('+", "+')+" -%>"
+      if partial
+        html << "<%=render(:partial=>#{partial.inspect}, :locals =>{:#{foreign_record}=>#{foreign_record}, :content=>content, :search=>search})-%>"
+      else
+        html << "<%=highlight(content, search)-%>"
+      end
+      html << '</li><%end-%></ul>'
+
+      code << "#{foreign_records} = #{field_datasource(field)}.find(:all, :conditions=>conditions"+joins+order+limit+")\n"
+      code << "render :inline=>#{html.inspect}, :locals=>{:#{foreign_records}=>#{foreign_records}, :search=>search}\n"
       return code
     end
 

@@ -27,7 +27,7 @@ module Formize
     def arguments
       args = []
       args << {:name=>form.record_name}
-      args += self.dependeds
+      # args += self.dependeds
       # args << {:name=>@depend_on} if @depend_on
       return args
     end

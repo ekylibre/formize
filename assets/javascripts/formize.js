@@ -96,9 +96,9 @@ Formize.Partials = {
         var params = new Hash();
         if (element.value !== null && element.value !== undefined) {
             params.set(element.id, element.value);
-            dependents.each(function(item) {
+            dependents.each(function(item_id) {
                 // Replaces element
-                item = $(item);
+                var item = $(item_id);
                 if (item) {
                     var url = item.readAttribute('data-refresh');
                     if (url !== null) {
@@ -109,6 +109,7 @@ Formize.Partials = {
                             parameters: params,
                             onSuccess: function(response) {
                                 item.replace(response.responseText);
+				$(item_id).fire("dom:loaded");
                             },
                             onFailure: function(response) {
                                 alert("ERROR FAILURE\n"+response.status+" "+response.statusText);
@@ -170,9 +171,12 @@ Formize.Partials = {
     },
 
     initializeUnroll: function(element) {
-	var choices;
+	var choices, paramName;
+	if (element.valueField !== null && element.valueField !== undefined) { 
+	    return false;
+	}
+
 	choices = element.readAttribute('data-choices-container');
-	//alert(choices);
 	if (choices === null) {
 	    choices = new Element('div', {
 		'id': this.uniqueID(),
@@ -182,18 +186,25 @@ Formize.Partials = {
 	    element.insert({after: choices});
 	    element.writeAttribute('data-choices-container', choices.id);
 	}
-
-	element.unroll_cache = element.value;
-	element.value_field = $(element.readAttribute('data-value-container'));
-	if (element.value_field === null) {
+	
+	element.unrollCache = element.value;
+	element.valueField = $(element.readAttribute('data-value-container'));
+	if (element.valueField === null) {
 	    alert('An input '+element.id+' with a "data-unroll" attribute must contain a "data-value-container" attribute');
 	}
+	element.maxResize = parseInt(element.readAttribute('data-max-resize'));
+	if (isNaN(element.maxResize) || element.maxResize === 0) { element.maxResize = 64; }
+	element.size = (element.unrollCache.length > element.maxResize ? element.maxResize : element.unrollCache.length);
 	
-	new Ajax.AutoCompleter(element, choices, element.readAttribute('data-unroll'), {
+	new Ajax.Autocompleter(element, choices, element.readAttribute('data-unroll'), {
+	    method: 'GET',
+	    paramName: 'search',
 	    afterUpdateElement: function(element, selected) {
-		var model_id = /(\d+)$/.exec(value.id)[1];
-		element.value_field.value = model_id;
-		element.unroll_cache = element.value;
+		var model_id = /(\d+)$/.exec(selected.id)[1];
+		element.valueField.value = model_id;
+		element.valueField.fire("emulated:change");
+		element.unrollCache = element.value;
+		element.size = (element.unrollCache.length > element.maxResize ? element.maxResize : element.unrollCache.length);
             }
 	});
     }
@@ -206,6 +217,7 @@ Formize.Partials = {
 
     // Refreshes dependent elements
     document.on("change", "*[data-dependents]", Formize.Partials.refresh);
+    document.on("emulated:change", "*[data-dependents]", Formize.Partials.refresh);
 
     // Opens a dialog for a ressource creation
     document.on("click", "a[data-add-item]", function(event, element) {
@@ -227,26 +239,32 @@ Formize.Partials = {
 
     // Manage unroll
     // this is the only found way to work with dom:loaded
+
     Event.observe(window, "dom:loaded", function(event) {
 	$$('input[data-unroll]').each(function(element) {
 	    Formize.Partials.initializeUnroll(element);
 	});
     });
 
-    document.on("focus", "input[data-unroll]", function(event, element) {
-	if (element.unroll_cache === undefined) {
-	    element.unroll_cache = element.value;
+    document.on("focusin", "input[data-unroll]", function(event, element) {
+	if (element.unrollCache === undefined) {
+	    element.unrollCache = element.value;
 	}
     });
 
+
+    // if (1) {
+    // 	if (this.value != this.unrollCache) { 
+    // 	    this.valueField.value = ''; 
+    // 	}
+    // } else {
+    // 	this.value = this.unrollCache;
+    // }
     document.on("change", "input[data-unroll]", function(event, element) {
         window.setTimeout(function () {
-	    if (1) {
-		if (this.value != this.unroll_cache) { 
-		    this.value_field.value = ''; 
-		}
-	    } else {
-		this.value = this.unroll_cache;
+	    if (this.value != this.unrollCache) { 
+		this.valueField.value = ''; 
+		this.valueField.fire("emulated:change");
 	    }
 	}.bind(element), 200);
     });
@@ -255,9 +273,7 @@ Formize.Partials = {
 	if (event.keyCode === Event.KEY_RETURN) {
 	    event.stop();
 	    return false;
-	} else {
-	    return true;
-	}
+	} else { return true; }
     });
 
 })();
@@ -265,120 +281,119 @@ Formize.Partials = {
  
 
 
-/*
-  function dyliChange(dyli, id) {
-  var dyli_hf =$(dyli);
-  var dyli_tf =$(dyli+'_tf');
-  
-  return new Ajax.Request(dyli_hf.getAttribute('href'), {
-  method: 'get',
-  parameters: {id: id},
-  onSuccess: function(response) {
-  var obj = response.responseJSON;
-  if (obj!== null) {
-  dyli_hf.value = obj.hf_value;
-  dyli_tf.value = obj.tf_value;
-  dyli_tf.size = (dyli_tf.value.length > 64 ? 64 : dyli_tf.value.length);
-  }
-  }
-  });
-  }
+
+// function dyliChange(dyli, id) {
+//     var dyli_hf =$(dyli);
+//     var dyli_tf =$(dyli+'_tf');
+    
+//     return new Ajax.Request(dyli_hf.getAttribute('href'), {
+// 	method: 'get',
+// 	parameters: {id: id},
+// 	onSuccess: function(response) {
+// 	    var obj = response.responseJSON;
+// 	    if (obj!== null) {
+// 		dyli_hf.value = obj.hf_value;
+// 		dyli_tf.value = obj.tf_value;
+// 		dyli_tf.size = (dyli_tf.value.length > 64 ? 64 : dyli_tf.value.length);
+// 	    }
+// 	}
+//     });
+// }
 
 
-  function refreshList(select, request, source_url) {
-  return new Ajax.Request(source_url, {
-  method: 'get',
-  parameters: {selected: request.responseJSON.id},
-  onSuccess: function(response) {
-  var list = $(select);
-  list.update(response.responseText);
-  }
-  });
-  }
+// function refreshList(select, request, source_url) {
+//     return new Ajax.Request(source_url, {
+// 	method: 'get',
+// 	parameters: {selected: request.responseJSON.id},
+// 	onSuccess: function(response) {
+// 	    var list = $(select);
+// 	    list.update(response.responseText);
+// 	}
+//     });
+// }
 
-  function refreshAutoList(dyli, request) {
-  return dyliChange(dyli, request.responseJSON.id);
-  }
-
-
-  (function() {
-  
-  document.on("click", "a[data-new-item]", function(event, element) {
-  var list_id = element.readAttribute('data-new-item');
-  var url = element.readAttribute('href');
-  openDialog(url, list_id);
-  event.stop();
-  });
+// function refreshAutoList(dyli, request) {
+//     return dyliChange(dyli, request.responseJSON.id);
+// }
 
 
-  document.on("click", "a[data-dialog-open]", function(event, element) {
-  var url = element.readAttribute('data-dialog-open');
-  if (url === 'true') {
-  url = element.readAttribute('href');
-  }
-  openDialog(url, element.readAttribute('data-dialog-update'));
-  event.stop();
-  });
-
-  document.on("click", "a[data-dialog-close]", function(event, element) {
-  var dialog_id = element.readAttribute('data-dialog-close');
-  closeDialog(dialog_id);
-  event.stop();
-  });
-
-  document.on("submit", "form[data-dialog]", function(event, form) {
-  var dialog_id = form.readAttribute('data-dialog');
-  var dialog = $(dialog_id);
-
-  var field = new Element('input', { type: 'hidden', name: 'dialog', value: dialog_id });
-  form.insert(field);
-
-  new Ajax.Request(form.readAttribute('action'), {
-  method:      form.readAttribute('method') || 'post',
-  parameters:  Form.serialize(form),
-  asynchronous: true,
-  evalScripts: true,
-  onLoaded:  function(request){ resizeDialog(dialog_id); }, 
-  onSuccess: function(request){
-  if (request.responseJSON === null) {
-  // No return => validation error
-  dialog.update(request.responseText).resize();
-  } else {
-  // Refresh list or execute call 
-  var updated_id = dialog.readAttribute('data-dialog-update');
-  var updated = $(updated_id);
-  if (updated !== null) {
-  if (updated.readAttribute('text_field_id') === null) {
-  var url = updated.readAttribute('data-refresh');
-  var parameter = updated.readAttribute('data-id-parameter-name');
-  if (parameter === null) {
-  parameter = 'selected';
-  }
-  var parameters = $H();
-  parameters.set(parameter, request.responseJSON.id);
-  if (url !== null) {
-  new Ajax.Updater(updated_id, url, {
-  method: 'GET',
-  asynchronous:true,
-  evalScripts:true,
-  parameters: parameters,
-  onSuccess:  function(request) { form.fire("layout:resize",  request); }
-  });
-  }
-  } else {
-  dyliChange(updated_id, request.responseJSON.id);
-  }
-  }
-  // Close dialog
-  closeDialog(dialog_id);
-  }
-  }
-  });
-  event.stop();
-  return false;
-  });
+// (function() {
+    
+//     document.on("click", "a[data-new-item]", function(event, element) {
+// 	var list_id = element.readAttribute('data-new-item');
+// 	var url = element.readAttribute('href');
+// 	openDialog(url, list_id);
+// 	event.stop();
+//     });
 
 
+//     document.on("click", "a[data-dialog-open]", function(event, element) {
+// 	var url = element.readAttribute('data-dialog-open');
+// 	if (url === 'true') {
+// 	    url = element.readAttribute('href');
+// 	}
+// 	openDialog(url, element.readAttribute('data-dialog-update'));
+// 	event.stop();
+//     });
 
-  })();
-*/
+//     document.on("click", "a[data-dialog-close]", function(event, element) {
+// 	var dialog_id = element.readAttribute('data-dialog-close');
+// 	closeDialog(dialog_id);
+// 	event.stop();
+//     });
+
+//     document.on("submit", "form[data-dialog]", function(event, form) {
+// 	var dialog_id = form.readAttribute('data-dialog');
+// 	var dialog = $(dialog_id);
+
+// 	var field = new Element('input', { type: 'hidden', name: 'dialog', value: dialog_id });
+// 	form.insert(field);
+
+// 	new Ajax.Request(form.readAttribute('action'), {
+// 	    method:      form.readAttribute('method') || 'post',
+// 	    parameters:  Form.serialize(form),
+// 	    asynchronous: true,
+// 	    evalScripts: true,
+// 	    onLoaded:  function(request){ resizeDialog(dialog_id); }, 
+// 	    onSuccess: function(request){
+// 		if (request.responseJSON === null) {
+// 		    // No return => validation error
+// 		    dialog.update(request.responseText).resize();
+// 		} else {
+// 		    // Refresh list or execute call 
+// 		    var updated_id = dialog.readAttribute('data-dialog-update');
+// 		    var updated = $(updated_id);
+// 		    if (updated !== null) {
+// 			if (updated.readAttribute('text_field_id') === null) {
+// 			    var url = updated.readAttribute('data-refresh');
+// 			    var parameter = updated.readAttribute('data-id-parameter-name');
+// 			    if (parameter === null) {
+// 				parameter = 'selected';
+// 			    }
+// 			    var parameters = $H();
+// 			    parameters.set(parameter, request.responseJSON.id);
+// 			    if (url !== null) {
+// 				new Ajax.Updater(updated_id, url, {
+// 				    method: 'GET',
+// 				    asynchronous:true,
+// 				    evalScripts:true,
+// 				    parameters: parameters,
+// 				    onSuccess:  function(request) { form.fire("layout:resize",  request); }
+// 				});
+// 			    }
+// 			} else {
+// 			    dyliChange(updated_id, request.responseJSON.id);
+// 			}
+// 		    }
+// 		    // Close dialog
+// 		    closeDialog(dialog_id);
+// 		}
+// 	    }
+// 	});
+// 	event.stop();
+// 	return false;
+//     });
+
+
+
+// })();

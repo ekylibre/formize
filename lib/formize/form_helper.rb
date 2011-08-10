@@ -39,7 +39,7 @@ module Formize
 
     # Returns a text field which has the same behavior of +select+ but  with a search 
     # action which permits to find easily in very long lists...
-    def unroll(object_name, method, choices, options = {}, html_options = {})
+    def unroll(object_name, method, choices, options = {}, input_options={}, html_options = {})
       object = instance_variable_get("@#{object_name}")
       label = options[:label]
       if label.is_a?(String) or label.is_a?(Symbol)
@@ -48,8 +48,8 @@ module Formize
         label = Proc.new{|x| x.inspect}
       end
       html  = ""
-      html << hidden_field(object_name, method)
-      html << tag(:input, :type=>:text, "data-unroll"=>url_for(choices), "data-value-container"=>"#{object_name}_#{method}", :value=>label.call(object.send(method.to_s.gsub(/_id$/, ''))))
+      html << hidden_field(object_name, method, input_options)
+      html << tag(:input, :type=>:text, "data-unroll"=>url_for(choices), "data-value-container"=>"#{object_name}_#{method}", :value=>label.call(object.send(method.to_s.gsub(/_id$/, ''))), :size=>html_options.delete(:size)||32)
       return content_tag(:span, html, html_options)
     end
 

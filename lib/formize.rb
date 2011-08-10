@@ -11,7 +11,11 @@ module Formize
   # default_source used by mono_choices:
   # - :foreign_class : Class of foreign object
   # - :class : Class of object
-  # - <string> : Code used to select source
+  # - "variable_name" or :variable_name : A variable (Class name is computed with the name
+  #     of the variable. Example: "product" will have "Product" class_name. If class_name 
+  #     has to be different, use next possibility.
+  # - ["variable_name", "class_name"] : Code used to select source with the 
+  #     class_name of the variable.
   configure :default_source, :foreign_class
 
   # How many radio can be displayed before to become a +select+
