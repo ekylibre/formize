@@ -1,4 +1,7 @@
 # encoding: utf-8
+# Used for a bug with ruby 1.9.1 
+# http://rubyforge.org/tracker/index.php?func=detail&aid=28920&group_id=1513&atid=5921
+require 'psych'
 
 require 'rubygems'
 # require 'rake'
