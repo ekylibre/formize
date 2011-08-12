@@ -25,9 +25,9 @@ In controller:
       field :created_on
       field :client
       field_set :addresses, :depend_on=>:client do
-        field :default_contact, :choices=>'DEPENDENCY.contacts'
-        field :delivery_contact, :choices=>'DEPENDENCY.contacts'
-        field :invoice_contact, :choices=>'DEPENDENCY.contacts'
+        field :default_contact, :choices=>:contacts, :source=>:client
+        field :delivery_contact, :choices=>:contacts, :source=>:client
+        field :invoice_contact, :choices=>:contacts, :source=>:client
       end
       field_set :track do
         field :responsible
