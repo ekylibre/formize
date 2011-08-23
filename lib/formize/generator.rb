@@ -73,7 +73,7 @@ module Formize
       code << "end\n"  
       code.gsub!(/end\s*if/, 'elsif')
       # raise code
-      list = code.split("\n"); list.each_index{|x| puts((x+1).to_s.rjust(4)+": "+list[x])}
+      # list = code.split("\n"); list.each_index{|x| puts((x+1).to_s.rjust(4)+": "+list[x])}
       return code
     end
 
@@ -112,7 +112,7 @@ module Formize
       code << "end\n"
 
       # raise code
-      list = code.split("\n"); list.each_index{|x| puts((x+1).to_s.rjust(4)+": "+list[x])}
+      # list = code.split("\n"); list.each_index{|x| puts((x+1).to_s.rjust(4)+": "+list[x])}
       return code
     end
     

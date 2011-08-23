@@ -60,4 +60,5 @@ module Formize
 
 end
 
+require 'action_controller'
 ActionController::Base.send(:include, Formize::ActionController)
