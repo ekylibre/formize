@@ -5,7 +5,9 @@
 require 'rubygems'
 # require 'rake'
 # gem 'rake', '0.8.7'
-require 'psych'
+unless RUBY_VERSION.to_s.match(/^1.8/)
+  require 'psych'
+end
 
 require 'jeweler'
 Jeweler::Tasks.new do |gem|
