@@ -1,11 +1,11 @@
 # encoding: utf-8
 # Used for a bug with ruby 1.9.1 
 # http://rubyforge.org/tracker/index.php?func=detail&aid=28920&group_id=1513&atid=5921
-require 'psych'
 
 require 'rubygems'
 # require 'rake'
-gem 'rake', '0.8.7'
+# gem 'rake', '0.8.7'
+require 'psych'
 
 require 'jeweler'
 Jeweler::Tasks.new do |gem|
@@ -17,23 +17,7 @@ Jeweler::Tasks.new do |gem|
   gem.description = "Like simple_form or formtastic, it aims to handle easily forms but taking in account AJAX and HTML5 on depending fields mainly."
   gem.email = "brice.texier@ekylibre.org"
   gem.authors = ["Brice Texier"]
-  # Include your dependencies below. Runtime dependencies are required when using your gem,
-  # and development dependencies are only needed for development (ie running rake tasks, tests, etc)
-  #  gem.add_runtime_dependency 'jabber4r', '> 0.1'
-  #  gem.add_development_dependency 'rspec', '> 1.2.3'
-  # gem.add_development_dependency "bundler", "~> 1.0.0"
-  # Include your dependencies below. Runtime dependencies are required when using your gem,
-  # and development dependencies are only needed for development (ie running rake tasks, tests, etc)
-  #  gem.add_runtime_dependency 'jabber4r', '> 0.1'
-  #  gem.add_development_dependency 'rspec', '> 1.2.3'
-  gem.add_development_dependency "jeweler", "~> 1.6.4"
-  # Include your dependencies below. Runtime dependencies are required when using your gem,
-  # and development dependencies are only needed for development (ie running rake tasks, tests, etc)
-  #  gem.add_runtime_dependency 'jabber4r', '> 0.1'
-  #  gem.add_development_dependency 'rspec', '> 1.2.3'
-  gem.add_development_dependency "rcov", ">= 0"
-  gem.add_runtime_dependency "actionpack", ">= 0"
-  gem.add_runtime_dependency "activesupport", ">= 0"
+  # dependencies defined in Gemfile
 end
 Jeweler::RubygemsDotOrgTasks.new
 

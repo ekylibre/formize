@@ -1,3 +1,5 @@
+require 'rubygems'
+require "bundler/setup"
 require 'active_support'
 # Formize provides controller's side defined forms.
 module Formize
