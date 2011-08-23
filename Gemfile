@@ -1,5 +1,6 @@
 source "http://rubygems.org"
-gem "rake", "0.8.7"
+
+gem "rake", "~> 0.8.7"
 gem "activesupport", "~> 2.3"
 gem "actionpack", "~> 2.3"
 
