@@ -3,8 +3,6 @@
 # http://rubyforge.org/tracker/index.php?func=detail&aid=28920&group_id=1513&atid=5921
 
 require 'rubygems'
-# require 'rake'
-# gem 'rake', '0.8.7'
 unless RUBY_VERSION.to_s.match(/^1.8/)
   require 'psych'
 end
@@ -40,8 +38,17 @@ end
 
 task :default => :test
 
-require 'rake/rdoctask'
-Rake::RDocTask.new do |rdoc|
+# require 'rake/rdoctask'
+# Rake::RDocTask.new do |rdoc|
+#   version = File.exist?('VERSION') ? File.read('VERSION') : ""
+#   rdoc.rdoc_dir = 'rdoc'
+#   rdoc.title = "Formize #{version}"
+#   rdoc.rdoc_files.include('README*')
+#   rdoc.rdoc_files.include('lib/**/*.rb')
+# end  
+
+require 'rdoc/task'
+RDoc::Task.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title = "Formize #{version}"
