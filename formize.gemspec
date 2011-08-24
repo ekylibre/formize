@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{formize}
-  s.version = "0.0.7"
+  s.version = "0.0.8"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{Brice Texier}]
@@ -25,6 +25,8 @@ Gem::Specification.new do |s|
     "Rakefile",
     "VERSION",
     "assets/javascripts/formize.js",
+    "ci/Gemfile.rails-2.3.rb",
+    "ci/Gemfile.rails-3.0.rb",
     "formize.gemspec",
     "lib/formize.rb",
     "lib/formize/action_pack.rb",
