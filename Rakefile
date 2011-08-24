@@ -3,7 +3,7 @@
 # http://rubyforge.org/tracker/index.php?func=detail&aid=28920&group_id=1513&atid=5921
 
 require 'rubygems'
-unless RUBY_VERSION.to_s.match(/^1.8/)
+unless RUBY_VERSION.to_s.match(/^1\.8/)
   require 'psych'
 end
 
@@ -24,7 +24,7 @@ Jeweler::RubygemsDotOrgTasks.new
 require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
   test.libs << 'lib' << 'test'
-  test.pattern = 'test/**/test_*.rb'
+  test.test_files = Dir.glob("test/**/test_*.rb")
   test.verbose = true
 end
 
