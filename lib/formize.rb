@@ -6,17 +6,17 @@ module Formize
 
   def self.configure(name, value = nil)
     unless self.respond_to?("#{name}=")
-      mattr_accessor(name)
-      # code  = "unless defined?(@@#{name})\n"
-      # code << "  @@#{name} = nil\n"
-      # code << "end\n"
-      # code << "def self.#{name}\n"
-      # code << "  @@#{name}\n"
-      # code << "end\n"
-      # code << "def self.#{name}=(obj)\n"
-      # code << "  @@#{name} = obj\n"
-      # code << "end\n"
-      # class_eval(code, __FILE__, __LINE__ + 1)
+      # mattr_accessor(name)
+      code  = "unless defined?(@@#{name})\n"
+      code << "  @@#{name} = nil\n"
+      code << "end\n"
+      code << "def self.#{name}\n"
+      code << "  @@#{name}\n"
+      code << "end\n"
+      code << "def self.#{name}=(obj)\n"
+      code << "  @@#{name} = obj\n"
+      code << "end\n"
+      class_eval(code, __FILE__, __LINE__ + 1)
       self.send("#{name}=", value)
     end
   end
