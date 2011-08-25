@@ -47,3 +47,8 @@ RDoc::Task.new do |rdoc|
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
+
+# Import all rake files
+for rakefile in Dir.glob('lib/tasks/*.rake')
+  import(rakefile)
+end
