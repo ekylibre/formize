@@ -37,7 +37,7 @@ module Formize
       # Generates list of usable field 
       def formize_by_default(form)
         form.field_set do |f|
-          for column in model.columns
+          for column in form.model.columns
             next if column.name =~ /_count$/
             if column.name =~ /_id$/
               reflections = model.reflection.select{|x| x.primary_key_name.to_s == column.name.to_s }
