@@ -1,7 +1,6 @@
 source "http://rubygems.org"
 
-gem "activesupport"
-gem "actionpack"
+gem "rails"
 
 group :development do
   gem "jeweler", "~> 1.6.4"
