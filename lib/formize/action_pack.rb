@@ -36,9 +36,9 @@ module Formize
 
       # Generates list of usable field 
       def formize_by_default(form)
-        form.field_set do |f|
+        form.field_set(:general) do |f|
           for column in form.model.columns
-            next if column.name =~ /_count$/
+            next if column.name =~ /_count$/ or [:id, :created_at, :updated_at, :lock_version, :type, :creator_id, :updater_id].include?(column.name.to_sym)
             if column.name =~ /_id$/
               reflections = model.reflection.select{|x| x.primary_key_name.to_s == column.name.to_s }
               if reflections.size == 1

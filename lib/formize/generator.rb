@@ -100,7 +100,7 @@ module Formize
         code << view_method_call(element, varh).strip.gsub(/^/, '  ') << "\n" # 
         # code << "  #{varh} << " << element.method_call_code.gsub(/^/, '  ').strip << "\n"
       end
-      code << "  return #{varh}\n"
+      code << "  return #{varh}.html_safe\n"
       code << "end\n"
 
       code << "\n"
@@ -112,7 +112,7 @@ module Formize
       code << "end\n"
 
       # raise code
-      # list = code.split("\n"); list.each_index{|x| puts((x+1).to_s.rjust(4)+": "+list[x])}
+      list = code.split("\n"); list.each_index{|x| puts((x+1).to_s.rjust(4)+": "+list[x])}
       return code
     end
     
@@ -155,7 +155,7 @@ module Formize
       code  = "def #{element.prototype}\n"
       code << "  #{varh} = ''\n"
       code << view_partial_code(element, varh).strip.gsub(/^/, '  ') << "\n"
-      code << "  return #{varh}\n"
+      code << "  return #{varh}.html_safe\n"
       code << "end\n"
       return code
     end

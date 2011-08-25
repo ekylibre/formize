@@ -8,7 +8,8 @@ module Formize
     unless ::Rails::VERSION::MAJOR == 3 && ::Rails::VERSION::MINOR >= 1
       def copy_assets
         copy_file '../../../../assets/javascripts/formize.js',  'public/javascripts/formize.js'
-        # copy_file '../../../../assets/stylesheets/formize.css', 'public/stylesheets/formize.css'
+        copy_file '../../../../assets/javascripts/jquery_ui_formize.js',  'public/javascripts/jquery_ui_formize.js'
+        copy_file '../../../../assets/stylesheets/formize.css', 'public/stylesheets/formize.css'
       end
     end
 

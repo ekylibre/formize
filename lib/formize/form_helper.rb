@@ -23,7 +23,7 @@ module Formize
     def hard_content_tag(name, options={}, escape=true, &block)
       content = ''
       yield content
-      return content_tag(name, content, options, escape)
+      return content_tag(name, content.html_safe, options, escape)
     end
 
     # Returns a list of radio buttons for specified attribute (identified by +method+)
@@ -53,6 +53,27 @@ module Formize
       return content_tag(:span, html, html_options)
     end
 
+    
+    # Returns a text field for selecting a Date with a hidden field containing
+    # the well formatted date
+    def date_field(object_name, method, options = {})
+      object = instance_variable_get("@#{object_name}")
+      html  = ""
+      html << hidden_field(object_name, method)
+      html << tag(:input, :type=>:text, "data-datepicker"=>"#{object_name}_#{method}", :size=>options.delete(:size)||10)
+      return html
+    end
+
+    
+    # Returns a text field for selecting a Date with hour 
+    # with a hidden field containing the well formatted datetime
+    def datetime_field(object_name, method, options = {})
+      object = instance_variable_get("@#{object_name}")
+      html  = ""
+      html << hidden_field(object_name, method)
+      html << tag(:input, :type=>:text, "data-datepicker"=>"#{object_name}_#{method}", :size=>options.delete(:size)||10)
+      return html
+    end
 
 
   end
