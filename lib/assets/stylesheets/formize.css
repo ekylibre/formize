@@ -1,4 +1,4 @@
-fieldset .field { margin: 1ex 0 0; }
-fieldset .field:first-child { margin-top: 0 }
-.field label {width: 30%; margin: 0 1em; display: inline-block; text-align: right;}
-html[dir="rtl"] .field label {text-align: left}
+fieldset .fz.field { margin: 1ex 0 0; }
+fieldset .fz.field:first-child { margin-top: 0 }
+.fz.field label {width: 30%; margin: 0 1em; display: inline-block; text-align: right;}
+html[dir="rtl"] .fz.field label {text-align: left}

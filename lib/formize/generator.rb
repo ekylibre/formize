@@ -333,7 +333,7 @@ module Formize
     end
 
     def field_wrapper_attrs(field, html_options={})
-      html_options[:class] = "field #{html_options[:class]}".strip
+      html_options[:class] = "fz field #{html_options[:class]}".strip
       html_options[:class] = "#{html_options[:class]} #{field.type.to_s.gsub('_', '-')}".strip
       html_options[:class] = "#{html_options[:class]} required".strip if field.required
       return html_options
@@ -356,12 +356,13 @@ module Formize
     end
 
     def field_date_input(field, attrs={}, varc='varc')
-      attrs[:size] ||= 16
+      attrs[:size] ||= 10
       return "#{varc} << date_field(:#{field.record_name}, :#{field.method}, #{attrs.inspect})\n"
     end
 
     def field_datetime_input(field, attrs={}, varc='varc')
       attrs[:size] ||= 16
+      # TODO define Date format
       return "#{varc} << datetime_field(:#{field.record_name}, :#{field.method}, #{attrs.inspect})\n"
     end
 

@@ -1,6 +1,19 @@
 module Formize
   module FormHelper
 
+    # Include all stylesheets, javascripts and locales
+    # For Rails 3.0, not needed in Rails 3.1
+    def formize_include_tag(options={})
+      options[:locale] ||= I18n.locale
+      html  = ""
+      html << javascript_include_tag('jquery.ui.formize')
+      html << javascript_include_tag('locales/jquery.ui.datepicker-' + locale.to_s)
+      html << javascript_include_tag('formize')
+      html << stylesheet_link_tag('formize') unless options[:skip_stylesheet]
+      html << stylesheet_link_tag('jquery-ui')
+      return html.html_safe
+    end
+
     # Generates a form with all its fields as defined in controller.
     # If no name is given, it uses the name of the controller to find the corresponding model
     def formize_form(*args)
@@ -56,11 +69,29 @@ module Formize
     
     # Returns a text field for selecting a Date with a hidden field containing
     # the well formatted date
+    # Options are:
+    #  - +:format+: If +format+ is a +String+ it specify date format using a little subset of strftime options
+    #               %d, %j, %a, %A, %m, %b, %B, %y and %Y
+    #               else if +format+ is a +Symbol+ it uses I18n to find format
     def date_field(object_name, method, options = {})
       object = instance_variable_get("@#{object_name}")
+      format = options[:format]||:default
+      format = I18n.translate('date.formats.'+format.to_s) if format.is_a?(Symbol)
+      conv = {
+        'dd' => '%d',
+        'oo' => '%j',
+        'D'  => '%a',
+        'DD' => '%A',
+        'mm' => '%m',
+        'M'  => '%b',
+        'MM' => '%B',
+        'y'  => '%y',
+        'yy' => '%Y'
+      }
+      conv.each{|js, rb| format.gsub!(rb, js)}
       html  = ""
       html << hidden_field(object_name, method)
-      html << tag(:input, :type=>:text, "data-datepicker"=>"#{object_name}_#{method}", :size=>options.delete(:size)||10)
+      html << tag(:input, :type=>:text, "data-datepicker"=>"#{object_name}_#{method}", "data-date-format"=>format, "data-locale"=>I18n.locale, :size=>options.delete(:size)||10)
       return html
     end
 
