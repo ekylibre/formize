@@ -206,43 +206,6 @@ module Formize
       return code
     end
 
-    # def field_set_view_method_code(field_set, varh='html')
-    #   code  = "def #{field_set.prototype}\n"
-    #   code << "  #{varh} = ''\n"
-    #   code << field_set_view_partial_code(field_set, varh).strip.gsub(/^/, '  ') << "\n"
-    #   code << "  return #{varh}\n"
-    #   code << "end\n"
-    #   return code
-    # end
-
-    # def field_set_view_method_call(field_set, varh='varh')
-    #   code = ""
-    #   call = if @partials.include?(field_set)
-    #            "#{varh} << #{field_set.prototype}\n"
-    #          else
-    #            field_set_view_partial_code(field_set, varh).strip << "\n"
-    #          end
-
-    #   if field_set.depend_on
-    #     depended_field = form.fields[field_set.depend_on]
-    #     code << "#{field_set.depend_on} = #{form.record_name}.#{depended_field.name}\n"
-    #     if ref = depended_field.reflection
-    #       code << "#{field_set.depend_on} ||= #{field_datasource(depended_field)}.first\n"
-    #     end
-    #     code << "if #{field_set.depend_on}\n"
-    #     code << call.strip.gsub(/^/, '  ') << "\n"
-    #     code << "else\n"
-    #     opt = {:id=>field_set.html_id, :class=>"waiting", "data-refresh"=>Code.new("url_for(:controller=>:#{controller.controller_name}, :action=>:#{form.action_name}, :refresh=>'#{field_set.html_id}')")}
-    #     code << "  #{varh} << tag(:div, #{opt.inspect})\n"
-
-    #     code << "end\n"
-    #   else
-    #     code = call
-    #   end
-
-    #   return code
-    # end
-
     #####################################################################################
     #                             F I E L D     M E T H O D S                           #
     #####################################################################################
@@ -258,48 +221,16 @@ module Formize
       html_options = wrapper_attrs(field)
 
       varc = field.html_id
-      code  = "#{varh} << hard_content_tag(:div, #{html_options.inspect}) do |#{varc}|\n"
+      code  = "#{varh} << hard_content_tag(:table, #{html_options.inspect}) do |#{varc}|\n"
+      code << "  #{varc} << '<tr><td class=\"label\">'\n"
       code << "  #{varc} << label(:#{form.record_name}, :#{field.name}, nil, :class=>'attr')\n"
+      code << "  #{varc} << '</td><td class=\"input\">'\n"
       code << "  #{form.record_name}.#{field.name} ||= #{field.default.inspect}\n" if field.default
       code << self.send("field_#{field.type}_input", field, input_attrs, varc).strip.gsub(/^/, '  ') << "\n"
+      code << "  #{varc} << '</td></tr>'\n"
       code << "end\n"
       return code
     end
-
-    # def field_view_method_code(field, varh='html')
-    #   code  = "def #{field.prototype}\n"
-    #   code << "  #{varh} = ''\n"
-    #   code << field_view_partial_code(field, varh).strip.gsub(/^/, '  ') << "\n"
-    #   code << "  return #{varh}\n"
-    #   code << "end\n"
-    #   return code
-    # end
-
-    # def field_view_method_call(field, varh='varh')
-    #   code = ""
-    #   call = if @partials.include?(field)
-    #            "#{varh} << #{field.prototype}\n"
-    #          else
-    #            field_view_partial_code(field, varh).strip << "\n"
-    #          end
-
-    #   if field.depend_on
-    #     depended_field = form.fields[field.depend_on]
-    #     code << "#{field.depend_on} = #{form.record_name}.#{depended_field.name}\n"
-    #     code << "if #{field.depend_on}\n"
-    #     code << call.strip.gsub(/^/, '  ') << "\n"
-    #     code << "else\n"
-    #     attrs = field_wrapper_attrs(field)
-    #     attrs[:class] = "#{attrs[:class]} waiting".strip
-    #     code << "  #{varh} << tag(:div, #{attrs.inspect})\n"
-    #     code << "end\n"
-    #   else
-    #     code = call
-    #   end
-
-    #   return code
-    # end
-
 
     def field_datasource(field)
       source = field.source
@@ -315,6 +246,8 @@ module Formize
       end
     end
     
+    # Returns the name of the class of the source
+    # 
     def field_datasource_class_name(field)
       source = field.source
       source = Formize.default_source unless [Array, String, Symbol].include?(source.class)
@@ -396,9 +329,9 @@ module Formize
     def field_mono_choice_input(field, attrs={}, varc='varc')
       source_model = field_datasource_class_name(field).constantize
       reflection = source_model.reflections[field.choices]
-      if reflection.nil?
-        raise Exception.new("#{source_model.name} must have a reflection :#{field.choices}.")
-      end
+      # if reflection.nil?
+      #   raise Exception.new("#{source_model.name} must have a reflection :#{field.choices}.")
+      # end
       count = "#{field.choices}_count"
       select_first_if_empty = "  #{record_name}.#{field.name} ||= #{field_datasource(field)}.first\n"
       code  = "#{count} = #{field_datasource(field)}.count\n"
@@ -407,7 +340,7 @@ module Formize
       code << "elsif (#{count} <= #{Formize.radio_count_max})\n"
       code << select_first_if_empty
       code << field_mono_radio_input(field, attrs, varc).strip.gsub(/^/, '  ') << "\n"
-      if reflection.options[:finder_sql].nil?
+      if !reflection or (reflection and reflection.options[:finder_sql].nil?)
         code << "elsif (#{count} <= #{Formize.select_count_max})\n"
         code << select_first_if_empty
         code << field_mono_select_input(field, attrs, varc).strip.gsub(/^/, '  ') << "\n"
@@ -433,7 +366,7 @@ module Formize
           new_item_url[k] = Code.new(v) if v.is_a?(String)
         end
         edit_item_url = {} unless edit_item_url.is_a? Hash
-        if field.method.to_s.match(/_id$/) and refl = form.model.reflections[field.method.to_s[0..-4].to_sym]
+        if field.method.to_s.match(/_id$/) and refl = field.reflection # form.model.reflections[field.method.to_s[0..-4].to_sym]
           new_item_url[:controller] ||= refl.class_name.underscore.pluralize
           edit_item_url[:controller] ||= new_item_url[:controller]
         end
@@ -478,7 +411,7 @@ module Formize
       attrs[:cols] ||= 40
       attrs[:rows] ||= 3
       attrs[:class] = "#{attrs[:class]} #{attrs[:cols]==80 ? :code : nil}".strip
-      return "#{varc} << text_area(:#{field.record_name}, :#{field.method}, #{attrs.inspect})\n"
+      return "#{varc} << resizable_text_area(:#{field.record_name}, :#{field.method}, #{attrs.inspect})\n"
     end
 
 
@@ -511,11 +444,11 @@ module Formize
 
     def mono_choice_search_code(field)
       source_model = field_datasource_class_name(field).constantize
-      reflection = source_model.reflections[field.choices]
-      if reflection.nil?
-        raise Exception.new("#{source_model.name} must have a reflection :#{field.choices}.")
-      end
-      model = reflection.class_name.constantize
+      # reflection = source_model.reflections[field.choices]
+      # if reflection.nil?
+      #   raise Exception.new("#{source_model.name} must have a reflection :#{field.choices}.")
+      # end
+      model = field.reflection.class_name.constantize #reflection.class_name.constantize
       foreign_record  = model.name.underscore
       foreign_records = "#{source_model.name.underscore}_#{field.choices}"
       options = field.options

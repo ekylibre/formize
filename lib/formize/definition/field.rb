@@ -38,7 +38,7 @@ module Formize
             unless @item_label = @options.delete(:item_label)
               model = @reflection.class_name.constantize
               available_methods = (model.columns_hash.keys+model.instance_methods).collect{|x| x.to_s}
-              @item_label = [:label, :name, :code, :number, :inspect].detect{|x| available_methods.include?(x.to_s)}
+              @item_label = [:label, :name, :title, :code, :number, :inspect].detect{|x| available_methods.include?(x.to_s)}
             end
             @search_attributes = @options[:search] || @reflection.class_name.constantize.content_columns.select{|c| c.type != :boolean and ![:created_at, :updated_at, :lock_version].include?(c.name.to_sym)}.collect{|c| c.name.to_sym}
           else

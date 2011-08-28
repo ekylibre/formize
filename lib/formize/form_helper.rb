@@ -9,8 +9,8 @@ module Formize
       html << javascript_include_tag('jquery.ui.formize')
       html << javascript_include_tag('locales/jquery.ui.datepicker-' + locale.to_s)
       html << javascript_include_tag('formize')
-      html << stylesheet_link_tag('formize') unless options[:skip_stylesheet]
       html << stylesheet_link_tag('jquery-ui')
+      html << stylesheet_link_tag('formize') unless options[:skip_stylesheet]
       return html.html_safe
     end
 
@@ -63,7 +63,7 @@ module Formize
       html  = ""
       html << hidden_field(object_name, method, input_options)
       html << tag(:input, :type=>:text, "data-unroll"=>url_for(choices), "data-value-container"=>"#{object_name}_#{method}", :value=>label.call(object.send(method.to_s.gsub(/_id$/, ''))), :size=>html_options.delete(:size)||32)
-      return content_tag(:span, html, html_options)
+      return content_tag(:span, html.html_safe, html_options)
     end
 
     
@@ -104,6 +104,14 @@ module Formize
       html << hidden_field(object_name, method)
       html << tag(:input, :type=>:text, "data-datepicker"=>"#{object_name}_#{method}", :size=>options.delete(:size)||10)
       return html
+    end
+
+    
+    # Returns a text area which can be resized in the south-east corner
+    # Works exactly the same as +textarea+
+    def resizable_text_area(object_name, method, options = {})
+      options["data-resize-in"] = "ri"+rand.to_s[2..-1].to_i.to_s(36)
+      return content_tag(:div, text_area(object_name, method, options), :id=>options["data-resize-in"], :class=>"input")
     end
 
 
