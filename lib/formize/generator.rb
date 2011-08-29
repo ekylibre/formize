@@ -73,7 +73,7 @@ module Formize
       code << "end\n"  
       code.gsub!(/end\s*if/, 'elsif')
       # raise code
-      # list = code.split("\n"); list.each_index{|x| puts((x+1).to_s.rjust(4)+": "+list[x])}
+      list = code.split("\n"); list.each_index{|x| puts((x+1).to_s.rjust(4)+": "+list[x])}
       return code
     end
 
@@ -112,7 +112,7 @@ module Formize
       code << "end\n"
 
       # raise code
-      list = code.split("\n"); list.each_index{|x| puts((x+1).to_s.rjust(4)+": "+list[x])}
+      # list = code.split("\n"); list.each_index{|x| puts((x+1).to_s.rjust(4)+": "+list[x])}
       return code
     end
     
@@ -238,8 +238,10 @@ module Formize
       if source.is_a?(Array)
         return "#{source[0]}.#{field.choices}"
       elsif source == :foreign_class
+        # return field.reflection.class_name if field.choices.to_s == "all"
         return "#{field.reflection.class_name}.#{field.choices}"
       elsif source == :class
+        # return form.model.name if field.choices.to_s == "all"
         return "#{form.model.name}.#{field.choices}"
       else
         return "#{source}.#{field.choices}"
@@ -484,12 +486,11 @@ module Formize
       end
       
       select = (model.table_name+".id AS id, "+attributes_hash.collect{|k,v| v+" AS "+k}.join(", ")).inspect
-      joins = options[:joins] ? ", :joins=>"+options[:joins].inspect : ""
       
       code  = ""
       code << "conditions = [#{query.join(' AND ').inspect+parameters}]\n"
-      code << "search = params[:search]\n"
-      code << "words = search.lower.split(/[\\s\\,]+/)\n"
+      code << "search = params[:term]\n"
+      code << "words = search.to_s.mb_chars.downcase.strip.normalize.split(/[\\s\\,]+/)\n"
       code << "if words.size > 0\n"
       code << "  conditions[0] << '#{' AND ' if query.size>0}('\n"
       code << "  words.each_index do |index|\n"
@@ -506,8 +507,14 @@ module Formize
       code << "  end\n"
       code << "  conditions[0] << ')'\n"
       code << "end\n"
-      order = ", :order=>"+attributes.collect{|key| "#{key[0]} ASC"}.join(', ').inspect
-      limit = ", :limit=>"+(options[:limit]||12).to_s
+
+      # joins = options[:joins] ? ", :joins=>"+options[:joins].inspect : ""
+      # order = ", :order=>"+attributes.collect{|key| "#{key[0]} ASC"}.join(', ').inspect
+      # limit = ", :limit=>"+(options[:limit]||80).to_s
+      joins = options[:joins] ? ".joins(#{options[:joins].inspect})" : ""
+      order = ".order("+attributes.collect{|key| "#{key[0]} ASC"}.join(', ').inspect+")"
+      limit = ".limit(#{options[:limit]||80})"
+
       partial = options[:partial]
 
       html  = "<ul><%for #{foreign_record} in #{foreign_records}-%><li id='<%=#{foreign_record}.id-%>'>" 
@@ -520,7 +527,8 @@ module Formize
       end
       html << '</li><%end-%></ul>'
 
-      code << "#{foreign_records} = #{field_datasource(field)}.find(:all, :conditions=>conditions"+joins+order+limit+")\n"
+      # code << "#{foreign_records} = #{field_datasource(field)}.find(:all, :conditions=>conditions"+joins+order+limit+")\n"
+      code << "#{foreign_records} = #{field_datasource(field).gsub(/\.all$/, '')}.where(conditions)"+joins+order+limit+"\n"
       code << "render :inline=>#{html.inspect}, :locals=>{:#{foreign_records}=>#{foreign_records}, :search=>search}\n"
       return code
     end
