@@ -5,7 +5,14 @@ Simple form DSL with dynamic interactions for Rails.
 == Installation
 
 Add it to your Gemfile:
+  gem "jquery-rails" # Need to be explicitly specified
   gem "formize"
+
+Formize requires the gem +jquery-rails+, so if you don't already use it:
+  rails generate jquery:install
+
+Then install +formize+ in your app like +jquery-rails+:
+  rails generate formize:install
 
 It's not necessary, but I recommend to use HAML with it for cleaner views:
   gem "haml"

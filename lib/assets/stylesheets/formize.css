@@ -8,6 +8,6 @@ html[dir="rtl"] table.fz.field td.label {text-align: left}
 .mini-toolbar { margin: 0 8px; }
 
 #overlay { opacity: 0.4; background: black; margin: 0; padding: 0; border: none; }
-.dialog { background: white; border: 1px solid #777; padding: 8px; }
+.dialog { background: white; border: 1px solid #777; padding: 8px; overflow-y: scroll;}
 
 .ui-resizable-se { bottom: 15px; right: 4px; }
