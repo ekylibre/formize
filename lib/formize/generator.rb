@@ -112,7 +112,7 @@ module Formize
       code << "end\n"
 
       # raise code
-      # list = code.split("\n"); list.each_index{|x| puts((x+1).to_s.rjust(4)+": "+list[x])}
+      list = code.split("\n"); list.each_index{|x| puts((x+1).to_s.rjust(4)+": "+list[x])}
       return code
     end
     
@@ -376,7 +376,7 @@ module Formize
         edit_item_url[:action] ||= :edit
         data = field.options.delete(:update)||field.html_id
         html_options = {"data-add-item"=>data, :class=>"icon im-new"}
-        code << "#{varc} << content_tag(:span, content_tag(:span, link_to(tg(:new), #{new_item_url.inspect}, #{html_options.inspect}).html_safe, :class=>:tool).html_safe, :class=>\"toolbar mini-toolbar\") if authorized?(#{new_item_url.inspect})\n"
+        code << "#{varc} << content_tag(:span, content_tag(:span, link_to(::I18n.translate('form.new'), #{new_item_url.inspect}, #{html_options.inspect}).html_safe, :class=>:tool).html_safe, :class=>\"toolbar mini-toolbar\")\n" #  if authorized?(#{new_item_url.inspect})
       end
       return code
     end
@@ -397,7 +397,7 @@ module Formize
         df = form.fields[depended[:name]]
         url[df.input_id.to_sym] = Code.new(df.reflection.nil? ? df.name : "#{df.name}.id")
       end
-      return "#{varc} << unroll(:#{field.record_name}, :#{field.method}, url_for(#{url.inspect}), #{options.inspect}, #{attrs.inspect})"
+      return "#{varc} << unroll(:#{field.record_name}, :#{field.method}, #{url.inspect}, #{options.inspect}, #{attrs.inspect})"
     end
 
     def field_string_input(field, attrs={}, varc='varc')
@@ -529,7 +529,12 @@ module Formize
 
       # code << "#{foreign_records} = #{field_datasource(field)}.find(:all, :conditions=>conditions"+joins+order+limit+")\n"
       code << "#{foreign_records} = #{field_datasource(field).gsub(/\.all$/, '')}.where(conditions)"+joins+order+limit+"\n"
-      code << "render :inline=>#{html.inspect}, :locals=>{:#{foreign_records}=>#{foreign_records}, :search=>search}\n"
+      # Render HTML is old Style
+      code << "respond_to do |format|\n"
+      code << "  format.html { render :inline=>#{html.inspect}, :locals=>{:#{foreign_records}=>#{foreign_records}, :search=>search} }\n"
+      code << "  format.json { render :json=>#{foreign_records}.collect{|#{foreign_record}| {:label=>#{foreign_record}.#{field.item_label}, :id=>#{foreign_record}.id}}.to_json }\n"
+      code << "  format.xml { render :xml=>#{foreign_records}.collect{|#{foreign_record}| {:label=>#{foreign_record}.#{field.item_label}, :id=>#{foreign_record}.id}}.to_xml }\n"
+      code << "end\n"      
       return code
     end
 

@@ -42,7 +42,7 @@ module Formize
             if column.name =~ /_id$/
               reflections = form.model.reflections.select{|k, x| x.primary_key_name.to_s == column.name.to_s }
               if reflections.size == 1
-                f.field(column.name.gsub(/_id$/, ''), :choices=>:all, :source=>:foreign_class)
+                f.field(column.name.gsub(/_id$/, ''), :choices=>:all, :source=>:foreign_class, :new=>true)
                 # elsif reflections.size > 1 # AMBIGUITY
                 # elsif reflections.size < 1 # NOTHING
               end

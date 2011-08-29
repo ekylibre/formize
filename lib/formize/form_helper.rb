@@ -62,7 +62,7 @@ module Formize
       end
       html  = ""
       html << hidden_field(object_name, method, input_options)
-      html << tag(:input, :type=>:text, "data-unroll"=>url_for(choices), "data-value-container"=>"#{object_name}_#{method}", :value=>label.call(object.send(method.to_s.gsub(/_id$/, ''))), :size=>html_options.delete(:size)||32)
+      html << tag(:input, :type=>:text, "data-unroll"=>url_for(choices.merge(:format=>:json)), "data-value-container"=>"#{object_name}_#{method}", :value=>label.call(object.send(method.to_s.gsub(/_id$/, ''))), :size=>html_options.delete(:size)||32)
       return content_tag(:span, html.html_safe, html_options)
     end
 
