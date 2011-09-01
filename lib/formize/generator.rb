@@ -190,14 +190,14 @@ module Formize
     end
 
     def wrapper_attrs(element)
-      html_options = (element.respond_to?(:html_options) ? element.html_options : {})
+      html_options = (element.respond_to?(:html_options) ? element.html_options.dup : {})
       html_options[:id] = element.html_id
       if @partials.include?(element)
         url = {:controller => controller.controller_name.to_sym, :action=>form.action_name.to_sym, :refresh=>element.html_id}
-        for depended in element.dependeds
-          df = form.fields[depended[:name]]
-          url[df.input_id.to_sym] = Code.new(df.reflection.nil? ? df.name : "#{df.name}.id")
-        end
+        # for depended in element.dependeds
+        #   df = form.fields[depended[:name]]
+        #   # url[df.input_id.to_sym] = Code.new(df.reflection.nil? ? df.name : "#{df.name}.id")
+        # end
         html_options["data-refresh"] = Code.new("url_for(#{url.inspect})")
       end
       special_method = "#{element.class.name.split('::')[-1].underscore}_#{__method__}".to_sym
@@ -233,7 +233,7 @@ module Formize
       input_attrs = (field.options[:input_options].is_a?(Hash) ? field.options[:input_options] : {})
       deps = form.dependents_on(field)
       if deps.size > 0
-        input_attrs["data-dependents"] = deps.collect{|d| d.html_id}.join(',') 
+        input_attrs["data-dependents"] = deps.collect{|d| "##{d.html_id}"}.join(',') 
       end
 
       # Initialize html attributes

@@ -98,7 +98,11 @@ module Formize
     def date_field(object_name, method, options = {})
       object = instance_variable_get("@#{object_name}")
       format = options[:format]||:default
-      format = I18n.translate('date.formats.'+format.to_s) if format.is_a?(Symbol)
+      raise ArgumentError.new("Option :format must be a Symbol referencing a translation 'date.formats.<format>'")unless format.is_a?(Symbol)
+      if localized_value = object.send(method)
+        localized_value = I18n.localize(localized_value, :format=>format)
+      end
+      format = I18n.translate('date.formats.'+format.to_s) 
       conv = {
         'dd' => '%d',
         'oo' => '%j',
@@ -113,7 +117,7 @@ module Formize
       conv.each{|js, rb| format.gsub!(rb, js)}
       html  = ""
       html << hidden_field(object_name, method)
-      html << tag(:input, :type=>:text, "data-datepicker"=>"#{object_name}_#{method}", "data-date-format"=>format, "data-locale"=>I18n.locale, :size=>options.delete(:size)||10)
+      html << tag(:input, :type=>:text, "data-datepicker"=>"#{object_name}_#{method}", "data-date-format"=>format, :value=>localized_value, "data-locale"=>I18n.locale, :size=>options.delete(:size)||10)
       return html
     end
 
