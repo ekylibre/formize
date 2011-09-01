@@ -2,7 +2,7 @@ module Formize
 
   # Represents an environment for a form or list of fields of one Record
   class Form
-    attr_reader :model, :elements, :record_name, :unique_name, :options, :id
+    attr_reader :elements, :model, :name, :record_name, :unique_name, :options, :id
     @@count = 0
 
 
@@ -24,19 +24,27 @@ module Formize
       yield field_set
     end
 
+    def group(name, options={}, &block)
+      raise ArgumentError.new("Missing block") unless block_given?
+      name, options = nil, name if name.is_a? Hash
+      group = new_element(Group, name, options)
+      yield group
+    end
+
     def field(name, options={})
       return new_element(Field, name, options)
     end
+
+    def fields(*args)
+      options = {}
+      options = args.delete_at(-1) if args[-1].is_a?(Hash)
+      for name in args
+        new_element(Field, name, options)
+      end
+    end
+
     
-    # def inner_method_code(options={})
-    #   varh = options[:html_variable] || 'html'
-    #   code = "#{varh} = ''\n"
-    #   for child in children
-    #     code << "#{varh} << " << child.method_call_code << "\n"
-    #   end
-    #   code << "return #{varh}\n"
-    #   return code
-    # end
+    # protected
 
     def controller_method_name
       @options[:controller_method_name] || "formize_#{model.underscore}"
@@ -50,16 +58,12 @@ module Formize
       @options[:action_name] || :formize
     end
 
-    # def methodics
-    #   return elements.collect{|e| e.methodics}.flatten
-    # end
-
     def mono_choices
       return elements.collect{|e| e.mono_choices}.flatten
     end
 
-    def fields
-      return elements.inject(HashWithIndifferentAccess.new){|h, e| h.merge!(e.fields)}
+    def all_fields
+      return elements.inject(HashWithIndifferentAccess.new){|h, e| h.merge!(e.all_fields)}
     end
 
     def dependents
@@ -74,11 +78,19 @@ module Formize
       return elements.collect{|e| e.dependents_on(element)}.flatten
     end
 
+    def shown_if(element)
+      return elements.collect{|e| e.shown_if(element)}.flatten
+    end
+
+    def hidden_if(element)
+      return elements.collect{|e| e.hidden_if(element)}.flatten
+    end
+
 
     private
 
     def new_element(klass, *args)
-      raise ArgumentError.new("Bad child type (#{klass.name}). Must be an Formize::FormElement") unless klass < FormElement
+      raise ArgumentError.new("Bad child type: #{klass.name} (#{klass.ancestors.inspect}). Must be an Formize::FormElement") unless klass < Formize::FormElement # klass.ancestors.include? Formize::FormElement
       element = klass.new(self, nil, *args)
       @elements << element
       return element

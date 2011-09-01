@@ -2,18 +2,23 @@ module Formize
     
   # Main class for form elements
   class FormElement
-    attr_reader :form, :parent, :children, :unique_name, :id, :depend_on, :html_id
-    @@count = 0
+    attr_reader :children, :depend_on, :form, :html_id, :id, :options, :parent, :unique_name
+    @@count = 0 #  unless defined? @@count
 
-    def initialize(form, parent = nil)
+    def initialize(form, parent = nil, options={})
       raise ArgumentError.new("Bad form (#{form.class.name}). Must be an Formize::Form") unless form.is_a? Formize::Form
       @form = form
       @parent = parent
+      @options = (options.is_a?(Hash) ? options : {})      
       @depend_on = nil
       @children = []
       @@count += 1
       @id = @@count.to_s(36)
-      @html_id = "fz#{@id}"
+      if Rails.env == "development"
+        @html_id = "fz_#{@form.options[:best_name]}_#{@id}"
+      else
+        @html_id = "fz#{@id}"
+      end
       @unique_name = self.form.unique_name + "_" + @html_id
     end
 
@@ -36,45 +41,6 @@ module Formize
       return "#{@unique_name}(" + arguments.collect{|x| x[:name]}.join(', ') + ")"
     end
 
-    # def method_name=(name)
-    #   raise ArgumentError.new("Name of field_set must be written only with a-z and 0-9 and _ (not #{name.inspect})") unless name.to_s == name.to_s.downcase.gsub(/[^a-z0-9\_]/, '')
-    #   @method_name = name
-    # end
-
-
-    # def method_code(options={})
-    #   varh = options[:html_variable] ||= 'html'
-    #   code  = "def #{method_name}(record)\n"
-    #   code << inner_method_code(options).gsub(/^/, '  ')
-    #   code << "  return #{varh}\n"
-    #   code << "end\n"
-    #   return code
-    # end
-
-    # def method_call_code(options={})
-    #   return inner_method_code(options) unless self.is_method?
-    #   return "#{method_name}(record)"
-    # end
-
-    # def inner_method_code(options={})
-    #   # raise NotImplementedError.new
-    #   return content_tag(:strong, "'#{self.class.name} does not implement :#{__method__} method'", options)
-    # end
-
-
-
-    # def is_method?
-    #   @depend_on.nil?
-    # end
-
-    # def methodics
-    #   elements = []
-    #   for child in self.children
-    #     elements += child.methodics
-    #   end
-    #   elements << self if self.is_method?
-    #   return elements
-    # end
 
     def mono_choices
       elements = []
@@ -85,10 +51,10 @@ module Formize
       return elements      
     end
 
-    def fields
+    def all_fields
       elements = HashWithIndifferentAccess.new()
       for child in self.children
-        elements.merge!(child.fields)
+        elements.merge!(child.all_fields)
       end
       elements[self.name] = self if self.class == Formize::Field
       return elements
@@ -121,7 +87,23 @@ module Formize
       return elements
     end
 
+    def shown_if(element)
+      elements = []
+      for child in self.children
+        elements += child.shown_if(element)
+      end
+      elements << self if self.options[:shown_if] and self.options[:shown_if].to_s == element.name.to_s
+      return elements
+    end
 
+    def hidden_if(element)
+      elements = []
+      for child in self.children
+        elements += child.hidden_if(element)
+      end
+      elements << self if self.options[:hidden_if] and self.options[:hidden_if].to_s == element.name.to_s
+      return elements
+    end
 
 
     protected

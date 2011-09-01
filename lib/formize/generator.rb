@@ -35,7 +35,7 @@ module Formize
           event = "if params[:unroll] == '#{mono_choice.html_id}'\n"
 
           for depended in mono_choice.dependeds
-            df = form.fields[depended[:name]]
+            df = form.all_fields[depended[:name]]
             event << "  #{df.name} = " << (df.reflection.nil? ? "params[:#{df.input_id}]" : "#{df.reflection.class_name}.find_by_id(params[:#{df.input_id}])") << "\n"
             # locals[df.name.to_sym] = Code.new(df.name)
           end
@@ -58,7 +58,7 @@ module Formize
           event  = "if params[:refresh] == '#{dependent.html_id}'\n"
           locals = {record_name.to_sym => Code.new(record_name)}
           for depended in dependent.dependeds
-            df = form.fields[depended[:name]]
+            df = form.all_fields[depended[:name]]
             event << "  #{record_name}.#{df.name} = " << (df.reflection.nil? ? "params[:#{df.input_id}]" : "#{df.reflection.class_name}.find_by_id(params[:#{df.input_id}])") << "\n"
             # locals[df.name.to_sym] = Code.new(df.name)
           end
@@ -147,7 +147,7 @@ module Formize
       dependeds = element.dependeds.collect{|d| d[:name]}
       if dependeds.size > 0
         for depended in dependeds
-          depended_field = form.fields[depended]
+          depended_field = form.all_fields[depended]
           code << "#{depended_field.name} = #{form.record_name}.#{depended_field.name}\n"
           if depended_field.reflection
             code << "#{depended_field.name} ||= #{field_datasource(depended_field)}.first\n"
@@ -163,6 +163,13 @@ module Formize
         code << "end\n"
       else
         code = partial_code
+      end
+
+      # General condition
+      if element.options[:if]
+        code = "if #{options[:if]}\n"+code.strip.gsub(/^/, '  ')+"\nend\n"
+      elsif element.options[:unless]
+        code = "unless #{options[:unless]}\n"+code.strip.gsub(/^/, '  ')+"\nend\n"
       end
       return code
     end
@@ -192,10 +199,19 @@ module Formize
     def wrapper_attrs(element)
       html_options = (element.respond_to?(:html_options) ? element.html_options.dup : {})
       html_options[:id] = element.html_id
+      if element.options[:hidden_if]
+        field = form.all_fields[element.options[:hidden_if]]
+        raise ArgumentError.new("Option :hidden_if must reference a check_box field (Not #{field.type.inspect})") unless field.type == :check_box
+        html_options['data-hidden-if'] = field.input_id
+      elsif element.options[:shown_if]
+        field = form.all_fields[element.options[:shown_if]]
+        raise ArgumentError.new("Option :shown_if must reference a check_box field (Not #{field.type.inspect})") unless field.type == :check_box
+        html_options['data-shown-if'] = field.input_id
+      end
       if @partials.include?(element)
         url = {:controller => controller.controller_name.to_sym, :action=>form.action_name.to_sym, :refresh=>element.html_id}
         # for depended in element.dependeds
-        #   df = form.fields[depended[:name]]
+        #   df = form.all_fields[depended[:name]]
         #   # url[df.input_id.to_sym] = Code.new(df.reflection.nil? ? df.name : "#{df.name}.id")
         # end
         html_options["data-refresh"] = Code.new("url_for(#{url.inspect})")
@@ -208,7 +224,21 @@ module Formize
     #####################################################################################
     #                         F I E L D _ S E T     M E T H O D S                       #
     #####################################################################################
+
+    def group_view_partial_code(group, varh='varh')
+      # Initialize html attributes
+      html_options = wrapper_attrs(group)
+
+      varc = group.html_id # "group_#{group.html_id}"
+      code  = "#{varh} << hard_content_tag(:div, #{html_options.inspect}) do |#{varc}|\n"
+      for child in group.children
+        code << view_method_call(child, varc).strip.gsub(/^/, '  ') << "\n"
+      end
+      code << "end\n"
+      return code
+    end
     
+
     def field_set_view_partial_code(field_set, varh='varh')
       # Initialize html attributes
       html_options = wrapper_attrs(field_set)
@@ -231,9 +261,15 @@ module Formize
       
     def field_view_partial_code(field, varh='varh')
       input_attrs = (field.options[:input_options].is_a?(Hash) ? field.options[:input_options] : {})
-      deps = form.dependents_on(field)
-      if deps.size > 0
-        input_attrs["data-dependents"] = deps.collect{|d| "##{d.html_id}"}.join(',') 
+      # deps = form.dependents_on(field)
+      # if deps.size > 0
+      #   input_attrs["data-dependents"] = deps.collect{|d| "##{d.html_id}"}.join(',') 
+      # end
+      for method, name in {:dependents_on=>"dependents", :shown_if=>"show", :hidden_if=>"hide"}
+        elements = form.send(method, field)
+        if elements.size > 0
+          input_attrs["data-#{name}"] = elements.collect{|d| "##{d.html_id}"}.join(',')
+        end
       end
 
       # Initialize html attributes
@@ -244,7 +280,7 @@ module Formize
       code << "  #{varc} << '<tr><td class=\"label\">'\n"
       code << "  #{varc} << label(:#{form.record_name}, :#{field.name}, nil, :class=>'attr')\n"
       code << "  #{varc} << '</td><td class=\"input\">'\n"
-      code << "  #{form.record_name}.#{field.name} ||= #{field.default.inspect}\n" if field.default
+      code << "  #{form.record_name}.#{field.name} ||= (#{field.default.inspect})\n" if field.default
       code << self.send("field_#{field.type}_input", field, input_attrs, varc).strip.gsub(/^/, '  ') << "\n"
       code << "  if @#{form.record_name}.errors['#{field.name}'].any?\n"
       code << "    #{varc} << '<ul class=\"inline-errors\">'\n"
@@ -421,7 +457,7 @@ module Formize
       options[:label] ||= Code.new("Proc.new{|r| \"#{mono_choice_label(field, 'r')}\"}")
       url = {:controller=>controller.controller_name, :action=>form.action_name, :unroll=>field.html_id}
       for depended in field.dependeds
-        df = form.fields[depended[:name]]
+        df = form.all_fields[depended[:name]]
         url[df.input_id.to_sym] = Code.new(df.reflection.nil? ? df.name : "#{df.name}.id")
       end
       return "#{varc} << unroll(:#{field.record_name}, :#{field.method}, #{url.inspect}, #{options.inspect}, #{attrs.inspect})"

@@ -3,14 +3,13 @@ module Formize
 
   # Represents the field element
   class Field < FormElement
-    attr_reader :name, :options, :column, :record_name, :method, :type, :required, :choices, :input_id, :source, :item_label, :field_id, :reflection, :html_options, :default, :search_attributes
+    attr_reader :name, :column, :record_name, :method, :type, :required, :choices, :input_id, :source, :item_label, :field_id, :reflection, :html_options, :default, :search_attributes
 
     TYPES = [:check_box, :choice, :date, :datetime, :label, :numeric, :password, :mono_choice, :string, :text_area].freeze
 
     def initialize(form, parent, name, options={})
-      super(form, parent)
+      super(form, parent, options)
       @name = name.to_s
-      @options = (options.is_a?(Hash) ? options : {})      
       @column = form.model.columns_hash[@name]
       @record_name = form.record_name
       @method = @name
@@ -19,7 +18,7 @@ module Formize
       end
       @html_options = @options.delete(:html_options)||{}
       @depend_on = @options.delete(:depend_on)
-      raise ArgumentError.new("A depended element must defined before its dependencies (#{@depended.inspect})") if !@depend_on.blank? and form.fields[@depend_on].nil?
+      raise ArgumentError.new("A depended element must defined before its dependencies (#{@depended.inspect})") if !@depend_on.blank? and form.all_fields[@depend_on].nil?
       if type = @options.delete(:as)
         raise ArgumentError.new("Unknown field type (got #{@options[:as].inspect}, expects #{TYPES.join(', ')})") unless TYPES.include? type
         @type = type

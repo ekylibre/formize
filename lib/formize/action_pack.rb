@@ -21,6 +21,7 @@ module Formize
         options[:view_form_method_name]   = "_#{self.controller_name}_formize_form_#{name}_tag"
         options[:view_fields_method_name] = "_#{self.controller_name}_formize_fields_#{name}_tag"
         options[:method_name] = options[:view_fields_method_name]
+        options[:best_name] = "#{self.controller_name}#{'_'+name.to_s if name != self.controller_name.to_sym}"
         form = Formize::Form.new(name, model, options)
         if block_given?
           yield form
