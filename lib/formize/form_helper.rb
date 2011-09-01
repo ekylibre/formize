@@ -1,6 +1,21 @@
 module Formize
   module FormHelper
 
+    # Code picked from Justin French's formtastic gem
+    FIELD_ERROR_PROC = proc do |html_tag, instance_tag|
+      html_tag
+    end
+
+    def with_custom_field_error_proc(&block)
+      default_field_error_proc = ::ActionView::Base.field_error_proc
+      ::ActionView::Base.field_error_proc = FIELD_ERROR_PROC
+      yield
+    ensure
+      ::ActionView::Base.field_error_proc = default_field_error_proc
+    end
+
+
+
     # Include all stylesheets, javascripts and locales
     # For Rails 3.0, not needed in Rails 3.1
     def formize_include_tag(options={})
@@ -37,6 +52,13 @@ module Formize
       content = ''
       yield content
       return content_tag(name, content.html_safe, options, escape)
+    end
+
+    # Permits to create a submit button well named for the given record
+    def submit_for(record, value=nil, options={})
+      value, options = nil, value if value.is_a?(Hash)
+      value ||= ::I18n.translate("helpers.submit.#{record.new_record? ? 'create' : 'update'}", :model=>record.class.model_name.human, :record=>record.class.model_name.human.mb_chars.downcase)
+      submit_tag(value, options.reverse_merge(:id => "#{record.class.name.underscore}_submit"))
     end
 
     # Returns a list of radio buttons for specified attribute (identified by +method+)
@@ -110,8 +132,10 @@ module Formize
     # Returns a text area which can be resized in the south-east corner
     # Works exactly the same as +textarea+
     def resizable_text_area(object_name, method, options = {})
-      options["data-resize-in"] = "ri"+rand.to_s[2..-1].to_i.to_s(36)
-      return content_tag(:div, text_area(object_name, method, options), :id=>options["data-resize-in"], :class=>"input")
+      # options["data-resize-in"] = "ri"+rand.to_s[2..-1].to_i.to_s(36)
+      # return content_tag(:div, text_area(object_name, method, options), :id=>options["data-resize-in"])
+      options["data-resizable"] = "true"
+      return text_area(object_name, method, options)
     end
 
 

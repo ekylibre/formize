@@ -62,6 +62,9 @@ module Formize
             event << "  #{record_name}.#{df.name} = " << (df.reflection.nil? ? "params[:#{df.input_id}]" : "#{df.reflection.class_name}.find_by_id(params[:#{df.input_id}])") << "\n"
             # locals[df.name.to_sym] = Code.new(df.name)
           end
+          if dependent.is_a?(Formize::Field) and dependent.reflection
+            event << "  #{record_name}.#{dependent.reflection.primary_key_name} = params[:selected].to_i if params[:selected]\n"
+          end
           event << "  render(:inline=>'<%=#{dependent.prototype}-%>', :locals=>#{locals.inspect})\n"
           event << "end\n"
         end
@@ -96,19 +99,35 @@ module Formize
       code << "def #{form.options[:view_fields_method_name]}(#{form.record_name}=nil)\n"
       code << "  #{form.record_name} = @#{form.record_name} unless #{form.record_name}.is_a?(#{form.model.name})\n"
       code << "  #{varh} = ''\n"
+      code << "  with_custom_field_error_proc do\n"
       for element in form.elements
-        code << view_method_call(element, varh).strip.gsub(/^/, '  ') << "\n" # 
-        # code << "  #{varh} << " << element.method_call_code.gsub(/^/, '  ').strip << "\n"
+        code << view_method_call(element, varh).strip.gsub(/^/, '    ') << "\n"
       end
+      code << "  end\n"
       code << "  return #{varh}.html_safe\n"
       code << "end\n"
 
       code << "\n"
       code << "def #{form.options[:view_form_method_name]}(#{form.record_name}=nil)\n"
       code << "  #{form.record_name} = @#{form.record_name} unless #{form.record_name}.is_a?(#{form.model.name})\n"
-      code << "  return form_for(#{form.record_name}) do\n"
-      code << "    #{form.options[:view_fields_method_name]}(#{form.record_name})\n"
+      code << "  #{varh} = ''\n"
+      code << "  if #{form.record_name}.errors.any?\n"
+      code << "    #{varh} << hard_content_tag(:div, :class=>'errors') do |fe|\n"
+      code << "      fe << content_tag(:h2, ::I18n.translate('activerecord.errors.template.body', :count=>#{form.record_name}.errors.size))\n"
+      code << "      if #{form.record_name}.errors[:base].any?\n"
+      code << "        fe << '<ul>'\n"
+      code << "        for error in #{form.record_name}.errors[:base]\n"
+      code << "          fe << content_tag(:li, error)\n"
+      code << "        end\n"
+      code << "        fe << '</ul>'\n"
+      code << "      end\n"
+      code << "    end\n"
       code << "  end\n"
+      code << "  #{varh} << form_for(#{form.record_name}, :html=>(params[:dialog] ? {'data-dialog'=>params[:dialog]} : {})) do\n"
+      code << "    concat(#{form.options[:view_fields_method_name]}(#{form.record_name}))\n"
+      code << "    concat(submit_for(#{form.record_name}))\n"
+      code << "  end\n"
+      code << "  return #{varh}.html_safe\n"
       code << "end\n"
 
       # raise code
@@ -227,6 +246,13 @@ module Formize
       code << "  #{varc} << '</td><td class=\"input\">'\n"
       code << "  #{form.record_name}.#{field.name} ||= #{field.default.inspect}\n" if field.default
       code << self.send("field_#{field.type}_input", field, input_attrs, varc).strip.gsub(/^/, '  ') << "\n"
+      code << "  if @#{form.record_name}.errors['#{field.name}'].any?\n"
+      code << "    #{varc} << '<ul class=\"inline-errors\">'\n"
+      code << "    for error in @#{form.record_name}.errors['#{field.name}']\n"
+      code << "      #{varc} << content_tag(:li, error)\n"
+      code << "    end\n"
+      code << "    #{varc} << '</ul>'\n"
+      code << "  end\n"
       code << "  #{varc} << '</td></tr>'\n"
       code << "end\n"
       return code
@@ -271,6 +297,7 @@ module Formize
       html_options[:class] = "fz field #{html_options[:class]}".strip
       html_options[:class] = "#{html_options[:class]} #{field.type.to_s.gsub('_', '-')}".strip
       html_options[:class] = "#{html_options[:class]} required".strip if field.required
+      html_options[:class] = Code.new("\"#{html_options[:class]}\#{' invalid' if @#{field.form.record_name}.errors['#{field.name}'].any?}\"")
       return html_options
     end
 
