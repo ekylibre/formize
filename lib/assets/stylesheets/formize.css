@@ -2,9 +2,11 @@ table.fz.field { width: 100%; border-collapse: collapse; border-spacing: 0;}
 fieldset .fz.field { margin: 1ex 0 0; }
 fieldset .fz.field:first-child { margin-top: 0 }
 
-table.fz.field td.label { padding: 0 1em; width: 30%; vertical-align: top;}
+table.fz.field td.label { padding: 2px 1em; width: 30%; vertical-align: top;}
 table.fz.field td.label { text-align: right;}
 html[dir="rtl"] table.fz.field td.label {text-align: left}
+
+span.rad * { vertical-align: baseline;}
 
 .mini-toolbar { margin: 0 8px; }
 
