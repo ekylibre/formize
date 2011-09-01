@@ -1,10 +1,13 @@
 require 'rubygems'
 require "bundler/setup"
 require 'active_support'
-# Formize provides controller's side defined forms.
+require 'formize/railtie' if defined?(::Rails)
+require 'formize/engine' if defined?(::Rails)
+
+# :include: ../README.rdoc
 module Formize
 
-  def self.configure(name, value = nil)
+  def self.configure(name, value = nil) # :nodoc:
     unless self.respond_to?("#{name}=")
       # mattr_accessor(name)
       code  = "unless defined?(@@#{name})\n"

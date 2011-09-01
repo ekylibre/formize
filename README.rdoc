@@ -4,20 +4,36 @@ Simple form DSL with dynamic interactions for Rails.
 
 == Installation
 
-Add it to your Gemfile:
+Add to your Gemfile these fllowing lines:
   gem "jquery-rails" # Need to be explicitly specified
   gem "formize"
 
+== Assets incorporation (JavaScripts and Stylesheets)
+Formize comes with basic scripts and stylesheets which must be included in the layout (at least at the start).
+
+=== In Rails 3.0.x
 Formize requires the gem +jquery-rails+, so if you don't already use it:
   rails generate jquery:install
 
 Then install +formize+ in your app like +jquery-rails+:
   rails generate formize:install
 
-It's not necessary, but I recommend to use HAML with it for cleaner views:
-  gem "haml"
+These previous commands install all the needed files in your +public/+ directory. 
+Then the files can be included with an helper:
+  # app/views/layouts/application.html.erb
+  <%= formize_include_tag -%>
+
+=== In Rails ≥ 3.1
+With the asset pipeline, there is no need to run generators or copy files. So for stylesheets:
+  # app/assets/stylesheets/application.css
+  *= require formize
+
+And for javascripts:
+  # app/assets/javascripts/application.js
+  *= require formize
 
 == Usage
+
 
 In controller:
 
