@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{formize}
-  s.version = "0.0.10"
+  s.version = "0.0.11"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{Brice Texier}]
@@ -13,12 +13,11 @@ Gem::Specification.new do |s|
   s.description = %q{Like simple_form or formtastic, it aims to handle easily forms but taking in account AJAX and HTML5 on depending fields mainly.}
   s.email = %q{brice.texier@ekylibre.org}
   s.extra_rdoc_files = [
-    "LICENSE.txt",
     "README.rdoc"
   ]
   s.files = [
     "Gemfile",
-    "LICENSE.txt",
+    "MIT-LICENSE",
     "README.rdoc",
     "VERSION",
     "lib/assets/images/ui-bg_flat_0_aaaaaa_40x100.png",
@@ -102,7 +101,9 @@ Gem::Specification.new do |s|
     "lib/formize/engine.rb",
     "lib/formize/generator.rb",
     "lib/formize/helpers.rb",
+    "lib/formize/helpers/asset_tag_helper.rb",
     "lib/formize/helpers/form_helper.rb",
+    "lib/formize/helpers/tag_helper.rb",
     "lib/formize/railtie.rb",
     "lib/generators/formize/install/USAGE",
     "lib/generators/formize/install/install_generator.rb",
