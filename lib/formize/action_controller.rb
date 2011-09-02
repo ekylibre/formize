@@ -22,13 +22,13 @@ module Formize
         options[:view_fields_method_name] = "_#{self.controller_name}_formize_fields_#{name}_tag"
         options[:method_name] = options[:view_fields_method_name]
         options[:best_name] = "#{self.controller_name}#{'_'+name.to_s if name != self.controller_name.to_sym}"
-        form = Formize::Form.new(name, model, options)
+        form = Formize::Definition::Form.new(name, model, options)
         if block_given?
           yield form
         else
           formize_by_default(form)
         end
-        generator = Formize::Generator.new(form, self)
+        generator = Formize::Generator::Base.new(form, self)
         class_eval(generator.controller_code, "#{__FILE__}:#{__LINE__}")
         ActionView::Base.send(:class_eval, generator.view_code, "#{__FILE__}:#{__LINE__}")
       end
@@ -41,7 +41,7 @@ module Formize
           for column in form.model.columns
             next if column.name =~ /_count$/ or [:id, :created_at, :updated_at, :lock_version, :type, :creator_id, :updater_id].include?(column.name.to_sym)
             if column.name =~ /_id$/
-              reflections = form.model.reflections.select{|k, x| x.primary_key_name.to_s == column.name.to_s }
+              reflections = form.model.reflections.select{ |k, x| x.primary_key_name.to_s == column.name.to_s }
               if reflections.size == 1
                 f.field(column.name.gsub(/_id$/, ''), :choices=>:all, :source=>:foreign_class, :new=>true)
                 # elsif reflections.size > 1 # AMBIGUITY
@@ -61,5 +61,5 @@ module Formize
 
 end
 
-require 'action_controller'
-ActionController::Base.send(:include, Formize::ActionController)
+# require 'action_controller'
+# ActionController::Base.send(:include, Formize::ActionController)

@@ -1,11 +1,13 @@
 # encoding: utf-8
 # Used for a bug with ruby 1.9.1 
 # http://rubyforge.org/tracker/index.php?func=detail&aid=28920&group_id=1513&atid=5921
-
 require 'rubygems'
 unless RUBY_VERSION.to_s.match(/^1\.8/)
   require 'psych'
 end
+require 'bundler'
+
+Bundler::GemHelper.install_tasks
 
 require 'jeweler'
 Jeweler::Tasks.new do |gem|
@@ -17,6 +19,7 @@ Jeweler::Tasks.new do |gem|
   gem.description = "Like simple_form or formtastic, it aims to handle easily forms but taking in account AJAX and HTML5 on depending fields mainly."
   gem.email = "brice.texier@ekylibre.org"
   gem.authors = ["Brice Texier"]
+  gem.files = `git ls-files lib`.split(/\n/)+['Gemfile', 'MIT-LICENSE', 'README.rdoc', 'VERSION']
   # dependencies defined in Gemfile
 end
 Jeweler::RubygemsDotOrgTasks.new

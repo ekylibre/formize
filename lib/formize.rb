@@ -1,11 +1,12 @@
-require 'rubygems'
-require "bundler/setup"
-require 'active_support'
+# require 'rubygems'
+# require 'bundler/setup'
+# require 'active_support'
 require 'formize/railtie' if defined?(::Rails)
 require 'formize/engine' if defined?(::Rails)
 
 # :include: ../README.rdoc
 module Formize
+  extend ActiveSupport::Autoload
 
   def self.configure(name, value = nil) # :nodoc:
     unless self.respond_to?("#{name}=")
@@ -40,11 +41,11 @@ module Formize
   # How many select options can be displayed before to become a +unroll+
   configure :select_count_max, 7
 
+  autoload :Definition
+  autoload :Helpers
+  autoload :ActionController
+  autoload :Generator
 end
 
-require 'action_view'
-require 'formize/definition'
-require 'formize/generator'
-require 'formize/form_helper'
-require 'formize/action_pack'
+# require 'action_view'
 

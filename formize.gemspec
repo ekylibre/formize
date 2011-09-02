@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{Brice Texier}]
-  s.date = %q{2011-09-01}
+  s.date = %q{2011-09-02}
   s.description = %q{Like simple_form or formtastic, it aims to handle easily forms but taking in account AJAX and HTML5 on depending fields mainly.}
   s.email = %q{brice.texier@ekylibre.org}
   s.extra_rdoc_files = [
@@ -17,16 +17,10 @@ Gem::Specification.new do |s|
     "README.rdoc"
   ]
   s.files = [
-    ".document",
-    ".travis.yml",
     "Gemfile",
     "LICENSE.txt",
     "README.rdoc",
-    "Rakefile",
     "VERSION",
-    "ci/Gemfile.rails-3.0.x",
-    "ci/Gemfile.rails-3.1.x",
-    "formize.gemspec",
     "lib/assets/images/ui-bg_flat_0_aaaaaa_40x100.png",
     "lib/assets/images/ui-bg_glass_55_fbf9ee_1x400.png",
     "lib/assets/images/ui-bg_glass_65_ffffff_1x400.png",
@@ -99,20 +93,20 @@ Gem::Specification.new do |s|
     "lib/assets/stylesheets/formize.css",
     "lib/assets/stylesheets/jquery-ui.css",
     "lib/formize.rb",
-    "lib/formize/action_pack.rb",
+    "lib/formize/action_controller.rb",
     "lib/formize/definition.rb",
-    "lib/formize/definition/element.rb",
     "lib/formize/definition/field.rb",
     "lib/formize/definition/field_set.rb",
     "lib/formize/definition/form.rb",
     "lib/formize/definition/form_element.rb",
-    "lib/formize/form_helper.rb",
+    "lib/formize/engine.rb",
     "lib/formize/generator.rb",
+    "lib/formize/helpers.rb",
+    "lib/formize/helpers/form_helper.rb",
+    "lib/formize/railtie.rb",
     "lib/generators/formize/install/USAGE",
     "lib/generators/formize/install/install_generator.rb",
-    "lib/generators/formize/install/templates/initializer.rb",
-    "test/helper.rb",
-    "test/test_formize.rb"
+    "lib/generators/formize/install/templates/initializer.rb"
   ]
   s.homepage = %q{http://github.com/burisu/formize}
   s.licenses = [%q{MIT}]
