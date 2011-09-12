@@ -8,7 +8,7 @@ Add to your Gemfile these fllowing lines:
   gem "jquery-rails" # Need to be explicitly specified
   gem "formize"
 
-== Assets incorporation (JavaScripts and Stylesheets)
+== Assets and configurations
 Formize comes with basic scripts and stylesheets which must be included in the layout (at least at the start).
 
 === In Rails 3.0.x
@@ -32,8 +32,11 @@ And for javascripts:
   # app/assets/javascripts/application.js
   *= require formize
 
-== Usage
+==== Default configuration file
+To install the default configuration file (config/initializers/formize.rb), the generator must be run:
+  rails generate formize:install
 
+== Usage
 
 In controller:
 
