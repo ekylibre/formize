@@ -13,7 +13,7 @@ Formize comes with basic scripts and stylesheets which must be included in the l
 
 === In Rails 3.0.x
 Formize requires the gem +jquery-rails+, so if you don't already use it:
-  rails generate jquery:install
+  rails generate jquery:install --ui
 
 Then install +formize+ in your app like +jquery-rails+:
   rails generate formize:install
