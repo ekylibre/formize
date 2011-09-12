@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{Brice Texier}]
-  s.date = %q{2011-09-02}
+  s.date = %q{2011-09-12}
   s.description = %q{Like simple_form or formtastic, it aims to handle easily forms but taking in account AJAX and HTML5 on depending fields mainly.}
   s.email = %q{brice.texier@ekylibre.org}
   s.extra_rdoc_files = [
@@ -112,7 +112,7 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/burisu/formize}
   s.licenses = [%q{MIT}]
   s.require_paths = [%q{lib}]
-  s.rubygems_version = %q{1.8.6}
+  s.rubygems_version = %q{1.8.7}
   s.summary = %q{Simple form DSL with dynamic interactions for Rails}
 
   if s.respond_to? :specification_version then
