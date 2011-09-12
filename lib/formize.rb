@@ -1,6 +1,3 @@
-# require 'rubygems'
-# require 'bundler/setup'
-# require 'active_support'
 require 'formize/railtie' if defined?(::Rails)
 require 'formize/engine' if defined?(::Rails)
 
@@ -46,6 +43,3 @@ module Formize
   autoload :ActionController
   autoload :Generator
 end
-
-# require 'action_view'
-
