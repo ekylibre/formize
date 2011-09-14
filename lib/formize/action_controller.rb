@@ -5,6 +5,30 @@ module Formize
     def self.included(base)
       base.extend(ClassMethods)
     end
+
+
+    # Adds method to provides a default response for create/update actions
+    # It saves the record/resource and return response with good status and headers
+    def save_and_respond(resource, options={}, &block)
+      creation = resource.new_record?
+      resource.attributes = options[:attributes] unless options[:attributes].nil?
+      respond_to do |format|
+        # if ((block_given? and block.arity == 1) ? yield(resource) : (block_given? and block.arity == 2) ? yield(resource, format) : resource.save)
+        if (block_given? ? yield(resource, format) : resource.save)
+          status = (creation ? :created : :ok)
+          response.headers["X-Return-Code"] = "success"
+          response.headers["X-Saved-Record-Id"] = resource.id.to_s
+          format.html { params[:dialog] ? head(status) : redirect_to(options[:url] || resource) }
+          format.xml  { render :xml => resource, :status => status, :location => resource }
+        else
+          response.headers["X-Return-Code"] = "invalid"
+          format.html { render :action => (resource.new_record? ? "new" : "edit")}
+          format.xml  { render :xml => resource.errors, :status => :unprocessable_entity }
+        end
+      end
+    end
+
+
     
     module ClassMethods
 
