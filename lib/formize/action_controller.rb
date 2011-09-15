@@ -6,7 +6,6 @@ module Formize
       base.extend(ClassMethods)
     end
 
-
     # Adds method to provides a default response for create/update actions
     # It saves the record/resource and return response with good status and headers
     def save_and_respond(resource, options={}, &block)

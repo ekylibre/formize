@@ -18,12 +18,17 @@ module Formize
       #
       # @option options [TrueClass, FalseClass] :skip_stylesheet
       #   Skip the inclusion of default stylesheet: formize.css
+      # 
+      # @option options [TrueClass, FalseClass] :with_formize
+      #   Include main javascript formize.js
+      # 
+      # @deprecated
       def formize_include_tag(options={})
         options[:locale] ||= ::I18n.locale
         html  = ""
         html << javascript_include_tag('jquery.ui.formize') if options[:special_ui]
         html << javascript_include_tag('locales/jquery.ui.datepicker-' + locale.to_s)
-        html << javascript_include_tag('formize')
+        html << javascript_include_tag('formize') if options[:with_formize]
         unless options[:skip_stylesheet]
           html << stylesheet_link_tag('jquery-ui')
           html << stylesheet_link_tag('formize') 
