@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{formize}
-  s.version = "0.0.13"
+  s.version = "0.0.14"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{Brice Texier}]
-  s.date = %q{2011-09-14}
+  s.date = %q{2011-09-15}
   s.description = %q{Like simple_form or formtastic, it aims to handle easily forms but taking in account AJAX and HTML5 on depending fields mainly.}
   s.email = %q{brice.texier@ekylibre.org}
   s.extra_rdoc_files = [
