@@ -8,6 +8,7 @@ module Formize
         include Formize::Helpers::AssetTagHelper
         include Formize::Helpers::TagHelper
         include Formize::Helpers::FormHelper
+        include Formize::Helpers::FormTagHelper
       end
       ActiveSupport.on_load(:action_controller) do
         include Formize::ActionController

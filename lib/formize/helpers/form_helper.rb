@@ -88,33 +88,28 @@ module Formize
           localized_value = I18n.localize(localized_value, :format=>format)
         end
         format = I18n.translate('date.formats.'+format.to_s) 
-        conv = {
-          'dd' => '%d',
-          'oo' => '%j',
-          'D'  => '%a',
-          'DD' => '%A',
-          'mm' => '%m',
-          'M'  => '%b',
-          'MM' => '%B',
-          'y'  => '%y',
-          'yy' => '%Y'
-        }
-        conv.each{|js, rb| format.gsub!(rb, js)}
+        Formize::DATE_FORMAT_TOKENS.each{|js, rb| format.gsub!(rb, js)}
         html  = ""
         html << hidden_field(object_name, method)
-        html << tag(:input, :type=>:text, "data-datepicker"=>"#{object_name}_#{method}", "data-date-format"=>format, :value=>localized_value, "data-locale"=>::I18n.locale, :size=>options.delete(:size)||10)
+        html << tag(:input, :type=>:text, "data-datepicker"=>"#{object_name}_#{method}", "data-format"=>format, :value=>localized_value, "data-locale"=>::I18n.locale, :size=>options.delete(:size)||10)
         return html
       end
 
       
-      # Returns a text field for selecting a Date with hour 
+      # Returns a text field for selecting a DateTime/Time
       # with a hidden field containing the well formatted datetime
       def datetime_field(object_name, method, options = {})
         object = instance_variable_get("@#{object_name}")
+        format = options[:format]||:default
+        raise ArgumentError.new("Option :format must be a Symbol referencing a translation 'time.formats.<format>'")unless format.is_a?(Symbol)
+        if localized_value = object.send(method)
+          localized_value = I18n.localize(localized_value, :format=>format)
+        end
+        format = I18n.translate('time.formats.'+format.to_s) 
+        Formize::TIME_FORMAT_TOKENS.each{|js, rb| format.gsub!(rb, js)}
         html  = ""
         html << hidden_field(object_name, method)
-        html << tag(:input, :type=>:text, "data-datepicker"=>"#{object_name}_#{method}", :size=>options.delete(:size)||10)
-        return html
+        html << tag(:input, :type=>:text, "data-datetimepicker"=>"#{object_name}_#{method}", "data-format"=>format, :value=>localized_value, "data-locale"=>::I18n.locale, :size=>options.delete(:size)||10)
       end
 
       
