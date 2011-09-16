@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{formize}
-  s.version = "0.0.14"
+  s.version = "0.0.15"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = [%q{Brice Texier}]
-  s.date = %q{2011-09-15}
+  s.date = %q{2011-09-16}
   s.description = %q{Like simple_form or formtastic, it aims to handle easily forms but taking in account AJAX and HTML5 on depending fields mainly.}
   s.email = %q{brice.texier@ekylibre.org}
   s.extra_rdoc_files = [
@@ -35,6 +35,7 @@ Gem::Specification.new do |s|
     "lib/assets/images/ui-icons_cd0a0a_256x240.png",
     "lib/assets/javascripts/formize.js",
     "lib/assets/javascripts/jquery.ui.formize.js",
+    "lib/assets/javascripts/jquery.ui.timepicker.js",
     "lib/assets/javascripts/locales/jquery.ui.datepicker-af.js",
     "lib/assets/javascripts/locales/jquery.ui.datepicker-ar.js",
     "lib/assets/javascripts/locales/jquery.ui.datepicker-az.js",
@@ -89,6 +90,20 @@ Gem::Specification.new do |s|
     "lib/assets/javascripts/locales/jquery.ui.datepicker-zh-CN.js",
     "lib/assets/javascripts/locales/jquery.ui.datepicker-zh-HK.js",
     "lib/assets/javascripts/locales/jquery.ui.datepicker-zh-TW.js",
+    "lib/assets/javascripts/locales/jquery.ui.timepicker-cs.js",
+    "lib/assets/javascripts/locales/jquery.ui.timepicker-de.js",
+    "lib/assets/javascripts/locales/jquery.ui.timepicker-el.js",
+    "lib/assets/javascripts/locales/jquery.ui.timepicker-es.js",
+    "lib/assets/javascripts/locales/jquery.ui.timepicker-et.js",
+    "lib/assets/javascripts/locales/jquery.ui.timepicker-fr.js",
+    "lib/assets/javascripts/locales/jquery.ui.timepicker-hu.js",
+    "lib/assets/javascripts/locales/jquery.ui.timepicker-id.js",
+    "lib/assets/javascripts/locales/jquery.ui.timepicker-it.js",
+    "lib/assets/javascripts/locales/jquery.ui.timepicker-lt.js",
+    "lib/assets/javascripts/locales/jquery.ui.timepicker-nl.js",
+    "lib/assets/javascripts/locales/jquery.ui.timepicker-ru.js",
+    "lib/assets/javascripts/locales/jquery.ui.timepicker-tr.js",
+    "lib/assets/javascripts/locales/jquery.ui.timepicker-vi.js",
     "lib/assets/stylesheets/formize.css",
     "lib/assets/stylesheets/jquery-ui.css",
     "lib/formize.rb",
@@ -103,11 +118,13 @@ Gem::Specification.new do |s|
     "lib/formize/helpers.rb",
     "lib/formize/helpers/asset_tag_helper.rb",
     "lib/formize/helpers/form_helper.rb",
+    "lib/formize/helpers/form_tag_helper.rb",
     "lib/formize/helpers/tag_helper.rb",
     "lib/formize/railtie.rb",
     "lib/generators/formize/install/USAGE",
     "lib/generators/formize/install/install_generator.rb",
-    "lib/generators/formize/install/templates/initializer.rb"
+    "lib/generators/formize/install/templates/initializer.rb",
+    "lib/tasks/formize.rake"
   ]
   s.homepage = %q{http://github.com/burisu/formize}
   s.licenses = [%q{MIT}]
