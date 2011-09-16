@@ -47,6 +47,7 @@ module Formize
     # js_dir = Pathname.new(File.dirname(__FILE__)).join("..", "assets", "javascripts")
     js_dir = File.join(File.dirname(__FILE__), "assets", "javascripts")
     File.open("#{js_dir}/formize.js", "wb") do |js|
+
       js.write "(function($) {\n"
       for file in Dir.glob("#{js_dir}/locales/jquery.ui.datepicker*.js").sort
         File.open(file, "rb") do |f|
@@ -61,11 +62,15 @@ module Formize
           js.write "\n"
         end
       end
-      # js.write "})(jQuery);\n"
+      js.write "})(jQuery);\n"
+
+
       # File.open("#{js_dir}/jquery.ui.timepicker.js", "rb") do |f|
       #   js.write f.read
       #   js.write "\n"
       # end
+
+
       # js.write "(function($) {\n"
       # for file in Dir.glob("#{js_dir}/locales/jquery.ui.timepicker*.js").sort
       #   File.open(file, "rb") do |f|
@@ -80,6 +85,8 @@ module Formize
       #   end
       # end
       # js.write "})(jQuery);\n"
+
+
       File.open("#{js_dir}/jquery.ui.formize.js", "rb") do |f|
         js.write f.read
         js.write "\n"
