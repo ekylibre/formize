@@ -11,16 +11,6 @@ module Formize
     'yy' => '%Y'
   }.freeze
   TIME_FORMAT_TOKENS = {
-    'dd' => '%d',
-    'oo' => '%j',
-    'D'  => '%a',
-    'DD' => '%A',
-    'mm' => '%m',
-    'M'  => '%b',
-    'MM' => '%B',
-    'y'  => '%y',
-    'yy' => '%Y',
-    # Time specific
     'hh' => '%H',
     'mm' => '%M',
     'ss' => '%S',
