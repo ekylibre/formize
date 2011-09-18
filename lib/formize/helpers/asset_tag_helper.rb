@@ -31,8 +31,8 @@ module Formize
         if options[:monolithic]
           html << javascript_include_tag('formize')
         else
+          html << javascript_include_tag('locales/jquery.ui.datepicker-' + locale.to_s+)
           html << javascript_include_tag('jquery.ui.formize')
-          html << javascript_include_tag('locales/jquery.ui.datepicker-' + locale.to_s)
         end
         unless options[:skip_stylesheet]
           html << stylesheet_link_tag('jquery-ui')
