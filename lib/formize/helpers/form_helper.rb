@@ -92,7 +92,7 @@ module Formize
         html  = ""
         html << hidden_field(object_name, method)
         html << tag(:input, :type=>:text, "data-datepicker"=>"#{object_name}_#{method}", "data-date-format"=>format, :value=>localized_value, "data-locale"=>::I18n.locale, :size=>options.delete(:size)||10)
-        return html
+        return html.html_safe
       end
 
       
