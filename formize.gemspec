@@ -4,14 +4,14 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{formize}
-  s.version = "0.0.17"
+  s.name = "formize"
+  s.version = "0.0.18"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = [%q{Brice Texier}]
-  s.date = %q{2011-09-16}
-  s.description = %q{Like simple_form or formtastic, it aims to handle easily forms but taking in account AJAX and HTML5 on depending fields mainly.}
-  s.email = %q{brice.texier@ekylibre.org}
+  s.authors = ["Brice Texier"]
+  s.date = "2011-09-18"
+  s.description = "Like simple_form or formtastic, it aims to handle easily forms but taking in account AJAX and HTML5 on depending fields mainly."
+  s.email = "brice.texier@ekylibre.org"
   s.extra_rdoc_files = [
     "README.rdoc"
   ]
@@ -126,11 +126,11 @@ Gem::Specification.new do |s|
     "lib/generators/formize/install/templates/initializer.rb",
     "lib/tasks/formize.rake"
   ]
-  s.homepage = %q{http://github.com/burisu/formize}
-  s.licenses = [%q{MIT}]
-  s.require_paths = [%q{lib}]
-  s.rubygems_version = %q{1.8.7}
-  s.summary = %q{Simple form DSL with dynamic interactions for Rails}
+  s.homepage = "http://github.com/burisu/formize"
+  s.licenses = ["MIT"]
+  s.require_paths = ["lib"]
+  s.rubygems_version = "1.8.10"
+  s.summary = "Simple form DSL with dynamic interactions for Rails"
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
