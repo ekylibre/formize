@@ -18,6 +18,7 @@ module Formize
         @unique_name = @options.delete(:unique_name) unless @options[:unique_name].blank?
         @unique_name ||= "_formize#{@id}"
         @record_name = @model.name.underscore
+        @elements_count = 0
       end
 
       def field_set(name=nil, options={}, &block)
@@ -90,6 +91,11 @@ module Formize
 
 
       private
+
+      def new_id
+        @elements_count += 1
+        return @elements_count.to_s(36)
+      end
 
       def new_element(klass, *args)
         raise ArgumentError.new("Bad child type: #{klass.name} (#{klass.ancestors.inspect}). Must be an Formize::Definition::FormElement") unless klass < Formize::Definition::FormElement # klass.ancestors.include? Formize::FormElement

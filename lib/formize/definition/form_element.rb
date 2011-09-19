@@ -5,7 +5,6 @@ module Formize
     # Main class for form elements
     class FormElement
       attr_reader :children, :depend_on, :form, :html_id, :id, :options, :parent, :unique_name
-      @@count = 0 #  unless defined? @@count
 
       def initialize(form, parent = nil, options={})
         raise ArgumentError.new("Bad form (#{form.class.name}). Must be an Formize::Definition::Form") unless form.is_a? Formize::Definition::Form
@@ -14,8 +13,7 @@ module Formize
         @options = (options.is_a?(Hash) ? options : {})      
         @depend_on = nil
         @children = []
-        @@count += 1
-        @id = @@count.to_s(36)
+        @id = form.send(:new_id)
         if Rails.env == "development"
           @html_id = "fz_#{@form.options[:best_name]}_#{@id}"
         else
