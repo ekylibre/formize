@@ -12,7 +12,7 @@ module Formize
         format = I18n.translate('date.formats.'+format.to_s)
         Formize::DATE_FORMAT_TOKENS.each{|js, rb| format.gsub!(rb, js)}        
         html  = ""
-        html << hidden_field_tag(name, value.to_s(:db))
+        html << hidden_field_tag(name, (value.is_a?(Date) ? value.to_s(:db) : value.to_s))
         html << tag(:input, :type=>:text, "data-datepicker"=>name, "data-date-format"=>format, :value=>localized_value, "data-locale"=>::I18n.locale, :size=>options.delete(:size)||10)
         return html.html_safe
       end
