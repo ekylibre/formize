@@ -63,7 +63,7 @@ module Formize
               # locals[df.name.to_sym] = Code.new(df.name)
             end
             if dependent.is_a?(Formize::Definition::Field) and dependent.reflection
-              event << "  #{record_name}.#{dependent.reflection.primary_key_name} = params[:selected].to_i if params[:selected]\n"
+              event << "  #{record_name}.#{dependent.reflection.send(Formize.foreign_key)} = params[:selected].to_i if params[:selected]\n"
             end
             event << "  render(:inline=>'<%=#{dependent.prototype}-%>', :locals=>#{locals.inspect})\n"
             event << "end\n"

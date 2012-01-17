@@ -64,7 +64,7 @@ module Formize
           for column in form.model.columns
             next if column.name =~ /_count$/ or [:id, :created_at, :updated_at, :lock_version, :type, :creator_id, :updater_id].include?(column.name.to_sym)
             if column.name =~ /_id$/
-              reflections = form.model.reflections.select{ |k, x| x.primary_key_name.to_s == column.name.to_s }
+              reflections = form.model.reflections.select{ |k, x| x.send(Formize.foreign_key).to_s == column.name.to_s }
               if reflections.size == 1
                 f.field(column.name.gsub(/_id$/, ''), :choices=>:all, :source=>:foreign_class, :new=>true)
                 # elsif reflections.size > 1 # AMBIGUITY

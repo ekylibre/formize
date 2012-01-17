@@ -3,6 +3,18 @@ require 'formize/engine' if defined?(::Rails)
 
 # :include: ../README.rdoc
 module Formize
+  if defined?(::Rails)
+    if ::Rails.version >= "3.1"
+      def self.foreign_key
+        :foreign_key
+      end
+    else
+      def self.foreign_key
+        :primary_key_name
+      end
+    end
+  end
+
   extend ActiveSupport::Autoload
 
   def self.configure(name, value = nil) # :nodoc:

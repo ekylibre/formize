@@ -34,7 +34,7 @@ module Formize
               @source = @options.delete(:source) # || @reflection.class_name
               @is_method = true if @options[:new]
               @method_name = self.form.unique_name + "_inf_" + @name
-              @method = @reflection.primary_key_name
+              @method = @reflection.send(Formize.foreign_key)
               unless @item_label = @options.delete(:item_label)
                 model = @reflection.class_name.constantize
                 available_methods = (model.columns_hash.keys+model.instance_methods).collect{|x| x.to_s}
