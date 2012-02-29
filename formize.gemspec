@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "formize"
-  s.version = "0.0.21"
+  s.version = "0.0.22"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Brice Texier"]
-  s.date = "2012-01-17"
+  s.date = "2012-02-29"
   s.description = "Like simple_form or formtastic, it aims to handle easily forms but taking in account AJAX and HTML5 on depending fields mainly."
   s.email = "brice.texier@ekylibre.org"
   s.extra_rdoc_files = [
@@ -129,7 +129,7 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/burisu/formize"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = "1.8.11"
+  s.rubygems_version = "1.8.10"
   s.summary = "Simple form DSL with dynamic interactions for Rails"
 
   if s.respond_to? :specification_version then
@@ -138,14 +138,12 @@ Gem::Specification.new do |s|
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<rails>, ["~> 3"])
       s.add_runtime_dependency(%q<jquery-rails>, [">= 0"])
-      s.add_runtime_dependency(%q<fastercsv>, [">= 0"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.6.4"])
       s.add_development_dependency(%q<rcov>, [">= 0"])
       s.add_development_dependency(%q<rdoc>, [">= 2.4.2"])
     else
       s.add_dependency(%q<rails>, ["~> 3"])
       s.add_dependency(%q<jquery-rails>, [">= 0"])
-      s.add_dependency(%q<fastercsv>, [">= 0"])
       s.add_dependency(%q<jeweler>, ["~> 1.6.4"])
       s.add_dependency(%q<rcov>, [">= 0"])
       s.add_dependency(%q<rdoc>, [">= 2.4.2"])
@@ -153,7 +151,6 @@ Gem::Specification.new do |s|
   else
     s.add_dependency(%q<rails>, ["~> 3"])
     s.add_dependency(%q<jquery-rails>, [">= 0"])
-    s.add_dependency(%q<fastercsv>, [">= 0"])
     s.add_dependency(%q<jeweler>, ["~> 1.6.4"])
     s.add_dependency(%q<rcov>, [">= 0"])
     s.add_dependency(%q<rdoc>, [">= 2.4.2"])
