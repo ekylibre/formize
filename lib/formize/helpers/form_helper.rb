@@ -89,8 +89,10 @@ module Formize
         end
         format = I18n.translate('date.formats.'+format.to_s) 
         Formize::DATE_FORMAT_TOKENS.each{|js, rb| format.gsub!(rb, js)}
+        key_options = {}
+        options.each{|k,v| key_options[k] = v if k.to_s.match(/^data\-/)}
         html  = ""
-        html << hidden_field(object_name, method)
+        html << hidden_field(object_name, method, key_options)
         html << tag(:input, :type=>:text, "data-datepicker"=>"#{object_name}_#{method}", "data-date-format"=>format, :value=>localized_value, "data-locale"=>::I18n.locale, :size=>options.delete(:size)||10)
         return html.html_safe
       end
