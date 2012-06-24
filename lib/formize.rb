@@ -1,5 +1,5 @@
-require 'formize/railtie' if defined?(::Rails)
-require 'formize/engine' if defined?(::Rails)
+require 'formize/rails/railtie' if defined?(::Rails)
+require 'formize/rails/engine' if defined?(::Rails)
 
 # :include: ../README.rdoc
 module Formize

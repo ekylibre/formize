@@ -3,7 +3,6 @@ rvm:
   - 1.9.2
   - 1.9.3
 gemfile:
-  - ci/Gemfile.rails-3.0
   - ci/Gemfile.rails-3.1
   - ci/Gemfile.rails-3.2
 script: "bundle exec rake test"
