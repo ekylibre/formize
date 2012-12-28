@@ -1,6 +1,6 @@
 = Formize
 
-Simple form DSL with dynamic interactions for Rails.
+Form helpers. Will be integrated with SimpleForm.
 
 == Installation
 
@@ -38,49 +38,15 @@ To install the default configuration file (config/initializers/formize.rb), the 
 
 == Usage
 
-In controller:
+TODO: Rewrite examples
 
-  class OrdersController < ApplicationController
-    # Generates default helpers method and a controller method :formize
-    # for a model Order.
-    formize
+=== Date
 
-    # Personnalized example
-    formize do
-      field :number
-      field :created_on
-      field :client
-      field_set :addresses, :depend_on=>:client do
-        field :default_contact, :choices=>:contacts, :source=>:client
-        field :delivery_contact, :choices=>:contacts, :source=>:client
-        field :invoice_contact, :choices=>:contacts, :source=>:client
-      end
-      field_set :track do
-        field :responsible
-        field :department
-      end
-    end
+=== Datetime
 
-    # Moreover, with a specified model
-    formize(:lines, :model=>:order_lines)
+=== Unroll (replacement of ComboBox)
 
-  end
-
-In views:
-
-  # app/views/orders/_form.html.haml
-  =formize_form
-
-or:
-
-  # app/views/orders/_form.html.haml
-  =form_tag do
-    =formize_fields
-
-or:
-
-  # app/views/orders/_form.html.haml
-  =formize_form :lines
+=== MonoChoice (dynamic selector)
 
 
 == Contributing to Formize {<img src="https://secure.travis-ci.org/burisu/formize.png"/>}[http://travis-ci.org/burisu/formize]

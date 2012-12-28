@@ -15,44 +15,45 @@ module Formize
         ::ActionView::Base.field_error_proc = default_field_error_proc
       end
 
-      # Generates a form with all its fields as defined in controller.
-      # If no name is given, it uses the name of the controller to find the corresponding model
-      def formize_form(*args)
-        name, options = nil, {}
-        name = args[0] if args[0].is_a? Symbol
-        options = args[-1] if args[-1].is_a? Hash
-        self.send("_#{options[:controller]||self.controller_name}_#{__method__}_#{name||self.controller_name}_tag")
-      end
+      # # Generates a form with all its fields as defined in controller.
+      # # If no name is given, it uses the name of the controller to find the corresponding model
+      # def formize_form(*args)
+      #   name, options = nil, {}
+      #   name = args[0] if args[0].is_a? Symbol
+      #   options = args[-1] if args[-1].is_a? Hash
+      #   self.send("_#{options[:controller]||self.controller_name}_#{__method__}_#{name||self.controller_name}_tag")
+      # end
 
-      # Generates all the fields as defined in controller with the <form> tag.
-      # If no name is given, it uses the name of the controller to find the corresponding model
-      def formize_fields(*args)
-        name, options = nil, {}
-        name = args[0] if args[0].is_a? Symbol
-        options = args[-1] if args[-1].is_a? Hash
-        self.send("_#{options[:controller]||self.controller_name}_#{__method__}_#{name||self.controller_name}_tag")
-      end
+      # # Generates all the fields as defined in controller with the <form> tag.
+      # # If no name is given, it uses the name of the controller to find the corresponding model
+      # def formize_fields(*args)
+      #   name, options = nil, {}
+      #   name = args[0] if args[0].is_a? Symbol
+      #   options = args[-1] if args[-1].is_a? Hash
+      #   self.send("_#{options[:controller]||self.controller_name}_#{__method__}_#{name||self.controller_name}_tag")
+      # end
 
-      # Permits to create a submit button well named for the given record
-      def submit_for(record, value=nil, options={})
-        value, options = nil, value if value.is_a?(Hash)
-        value ||= ::I18n.translate("helpers.submit.#{record.new_record? ? 'create' : 'update'}", :model=>record.class.model_name.human, :record=>record.class.model_name.human.mb_chars.downcase)
-        submit_tag(value, options.reverse_merge(:id => "#{record.class.name.underscore}_submit"))
-      end
+      # # Permits to create a submit button well named for the given record
+      # def submit_for(record, value=nil, options={})
+      #   value, options = nil, value if value.is_a?(Hash)
+      #   value ||= ::I18n.translate("helpers.submit.#{record.new_record? ? 'create' : 'update'}", :model => record.class.model_name.human, :record => record.class.model_name.human.mb_chars.downcase)
+      #   submit_tag(value, options.reverse_merge(:id => "#{record.class.name.underscore}_submit"))
+      # end
 
-      # Returns a list of radio buttons for specified attribute (identified by +method+)
-      # on an object assigned to the template (identified by +object_name+). It works like +select+
-      def radio(object_name, method, choices, options = {}, html_options = {})
-        html = ""
+      # Returns a list of radio buttons for specified attribute (identified by 
+      # +method+) on an object assigned to the template (identified by 
+      # +object_name+). It works like +select+.
+      def radio_buttons(object_name, method, choices, options = {}, html_options = {})
+        html = "".html_safe
         html_options[:class] ||= :rad
         for choice in choices
-          html << content_tag(:span, radio_button(object_name, method, choice[1]) + '&nbsp;'.html_safe + label(object_name, method, choice[0], :value=>choice[1]), html_options)
+          html << content_tag(:span, radio_button(object_name, method, choice[1]) + '&nbsp;'.html_safe + label(object_name, method, choice[0], :value => choice[1]), html_options)
         end
         return html
       end
 
-      # Returns a text field which has the same behavior of +select+ but  with a search 
-      # action which permits to find easily in very long lists...
+      # Returns a text field which has the same behavior of +select+ but with 
+      # a search action which permits to find easily in very long lists...
       def unroll(object_name, method, choices, options = {}, input_options={}, html_options = {})
         object = instance_variable_get("@#{object_name}")
         label = options[:label]
@@ -63,7 +64,7 @@ module Formize
         end
         html  = ""
         html << hidden_field(object_name, method, input_options)
-        html << tag(:input, :type=>:text, "data-unroll"=>url_for(choices.merge(:format=>:json)), "data-value-container"=>"#{object_name}_#{method}", :value=>label.call(object.send(method.to_s.gsub(/_id$/, ''))), :size=>html_options.delete(:size)||32)
+        html << tag(:input, :type => :text, "data-unroll" => url_for(choices.merge(:format => :json)), "data-value-container" => "#{object_name}_#{method}", :value => label.call(object.send(method.to_s.gsub(/_id$/, ''))), :size => html_options.delete(:size)||32)
         return content_tag(:span, html.html_safe, html_options)
       end
 
@@ -85,7 +86,7 @@ module Formize
         format = options[:format]||:default
         raise ArgumentError.new("Option :format must be a Symbol referencing a translation 'date.formats.<format>'")unless format.is_a?(Symbol)
         if localized_value = object.send(method)
-          localized_value = I18n.localize(localized_value, :format=>format)
+          localized_value = I18n.localize(localized_value, :format => format)
         end
         format = I18n.translate('date.formats.'+format.to_s) 
         Formize::DATE_FORMAT_TOKENS.each{|js, rb| format.gsub!(rb, js)}
@@ -93,7 +94,7 @@ module Formize
         options.each{|k,v| key_options[k] = v if k.to_s.match(/^data\-/)}
         html  = ""
         html << hidden_field(object_name, method, key_options)
-        html << tag(:input, :type=>:text, "data-datepicker"=>"#{object_name}_#{method}", "data-date-format"=>format, :value=>localized_value, "data-locale"=>::I18n.locale, :size=>options.delete(:size)||10)
+        html << tag(:input, :type => :text, "data-datepicker" => "#{object_name}_#{method}", "data-date-format" => format, :value => localized_value, "data-locale" => ::I18n.locale, :size => options.delete(:size)||10)
         return html.html_safe
       end
 
@@ -107,12 +108,12 @@ module Formize
       end
 
       
-      # Returns a text area which can be resized in the south-east corner
-      # Works exactly the same as +textarea+
-      def resizable_text_area(object_name, method, options = {})
-        options["data-resizable"] = "true"
-        return text_area(object_name, method, options)
-      end
+      # # Returns a text area which can be resized in the south-east corner
+      # # Works exactly the same as +textarea+
+      # def resizable_text_area(object_name, method, options = {})
+      #   options["data-resizable"] = "true"
+      #   return text_area(object_name, method, options)
+      # end
 
 
     end
