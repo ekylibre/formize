@@ -15,6 +15,10 @@ module Formize
     end
   end
 
+  # Module used to "stock" labelling methods for items
+  module CompiledLabels
+  end
+
   extend ActiveSupport::Autoload
 
   def self.configure(name, value = nil) # :nodoc:

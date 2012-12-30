@@ -104,7 +104,6 @@ module Formize
         return unless model.table_exists?
         generator = Generator::Base.new(self, action_name, model, options)
         class_eval(generator.controller_action, "#{__FILE__}:#{__LINE__}")
-        # ActionView::Base.send(:class_eval, generator.view_code, "#{__FILE__}:#{__LINE__}")
         Formize::CompiledLabels.send(:class_eval, generator.item_label_code, "#{__FILE__}:#{__LINE__}")
       end
 

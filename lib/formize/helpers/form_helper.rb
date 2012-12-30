@@ -68,6 +68,7 @@ module Formize
         return content_tag(:span, html.html_safe, html_options)
       end
 
+
       
       # Returns a text field for selecting a Date with a hidden field containing
       # the well formatted date
