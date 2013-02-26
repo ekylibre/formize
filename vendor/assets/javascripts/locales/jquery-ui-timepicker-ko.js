@@ -16,5 +16,5 @@
 		pmNames: ['오후', 'PM', 'P'],
 		isRTL: false
 	};
-	$.timepicker.setDefaults($.timepicker.regional['ko']);
+	// $.timepicker.setDefaults($.timepicker.regional['ko']);
 })(jQuery);

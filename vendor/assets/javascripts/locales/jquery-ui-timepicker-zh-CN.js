@@ -16,5 +16,5 @@
 		pmNames: ['PM', 'P'],
 		isRTL: false
 	};
-	$.timepicker.setDefaults($.timepicker.regional['zh-CN']);
+	// $.timepicker.setDefaults($.timepicker.regional['zh-CN']);
 })(jQuery);

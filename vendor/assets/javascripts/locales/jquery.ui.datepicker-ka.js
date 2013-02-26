@@ -17,5 +17,5 @@ jQuery(function($){
 		isRTL: false,
 		showMonthAfterYear: false,
 		yearSuffix: ''};
-	$.datepicker.setDefaults($.datepicker.regional['ka']);
+	// $.datepicker.setDefaults($.datepicker.regional['ka']);
 });

@@ -16,5 +16,5 @@
 		pmNames: ['下午', 'PM', 'P'],
 		isRTL: false
 	};
-	$.timepicker.setDefaults($.timepicker.regional['zh-TW']);
+	// $.timepicker.setDefaults($.timepicker.regional['zh-TW']);
 })(jQuery);

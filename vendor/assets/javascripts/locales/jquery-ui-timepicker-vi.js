@@ -16,5 +16,5 @@
 		pmNames: ['CH', 'PM', 'P'],
 		isRTL: false
 	};
-	$.timepicker.setDefaults($.timepicker.regional['vi']);
+	// $.timepicker.setDefaults($.timepicker.regional['vi']);
 })(jQuery);

@@ -16,5 +16,5 @@
 		pmNames: ['אחה"צ', 'PM', 'P'],
 		isRTL: true
 	};
-	$.timepicker.setDefaults($.timepicker.regional["he"]);
+	// $.timepicker.setDefaults($.timepicker.regional["he"]);
 })(jQuery);

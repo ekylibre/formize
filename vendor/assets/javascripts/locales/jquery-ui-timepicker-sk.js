@@ -16,5 +16,5 @@
 		pmNames: ['pop.', 'PM', 'P'],
 		isRTL: false
 	};
-	$.timepicker.setDefaults($.timepicker.regional['sk']);
+	// $.timepicker.setDefaults($.timepicker.regional['sk']);
 })(jQuery);

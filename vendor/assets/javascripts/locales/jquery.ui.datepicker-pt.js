@@ -18,5 +18,5 @@ jQuery(function($){
 		isRTL: false,
 		showMonthAfterYear: false,
 		yearSuffix: ''};
-	$.datepicker.setDefaults($.datepicker.regional['pt']);
+	// $.datepicker.setDefaults($.datepicker.regional['pt']);
 });

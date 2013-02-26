@@ -16,5 +16,5 @@
 		pmNames: ['popiet', 'PM', 'P'],
 		isRTL: false
 	};
-	$.timepicker.setDefaults($.timepicker.regional['lt']);
+	// $.timepicker.setDefaults($.timepicker.regional['lt']);
 })(jQuery);

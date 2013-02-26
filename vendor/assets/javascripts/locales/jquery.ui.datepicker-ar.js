@@ -19,5 +19,5 @@ jQuery(function($){
   		isRTL: true,
 		showMonthAfterYear: false,
 		yearSuffix: ''};
-	$.datepicker.setDefaults($.datepicker.regional['ar']);
+	// $.datepicker.setDefaults($.datepicker.regional['ar']);
 });

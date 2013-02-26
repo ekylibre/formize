@@ -16,5 +16,5 @@
 		pmNames: ['ip.', 'PM', 'P'],
 		isRTL: false
 	};
-	$.timepicker.setDefaults($.timepicker.regional['fi']);
+	// $.timepicker.setDefaults($.timepicker.regional['fi']);
 })(jQuery);

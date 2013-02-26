@@ -16,5 +16,5 @@
 		pmNames: ['du.', 'PM', 'P'],
 		isRTL: false
 	};
-	$.timepicker.setDefaults($.timepicker.regional['hu']);
+	// $.timepicker.setDefaults($.timepicker.regional['hu']);
 })(jQuery);

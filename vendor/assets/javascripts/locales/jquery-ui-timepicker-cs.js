@@ -16,5 +16,5 @@
 		pmNames: ['odp.', 'PM', 'P'],
 		isRTL: false
 	};
-	$.timepicker.setDefaults($.timepicker.regional['cs']);
+	// $.timepicker.setDefaults($.timepicker.regional['cs']);
 })(jQuery);

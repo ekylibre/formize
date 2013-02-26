@@ -16,5 +16,5 @@
 		pmNames: ['午後', 'PM', 'P'],
 		isRTL: false
 	};
-	$.timepicker.setDefaults($.timepicker.regional['ja']);
+	// $.timepicker.setDefaults($.timepicker.regional['ja']);
 })(jQuery);

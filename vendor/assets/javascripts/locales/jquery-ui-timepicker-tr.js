@@ -16,5 +16,5 @@
 		pmNames: ['ÖS', 'S'],
 		isRTL: false
 	};
-	$.timepicker.setDefaults($.timepicker.regional['tr']);
+	// $.timepicker.setDefaults($.timepicker.regional['tr']);
 })(jQuery);

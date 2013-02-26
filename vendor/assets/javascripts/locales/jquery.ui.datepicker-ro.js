@@ -22,5 +22,5 @@ jQuery(function($){
 		isRTL: false,
 		showMonthAfterYear: false,
 		yearSuffix: ''};
-	$.datepicker.setDefaults($.datepicker.regional['ro']);
+	// $.datepicker.setDefaults($.datepicker.regional['ro']);
 });

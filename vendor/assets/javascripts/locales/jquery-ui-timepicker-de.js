@@ -16,5 +16,5 @@
 		pmNames: ['nachm.', 'PM', 'P'],
 		isRTL: false
 	};
-	$.timepicker.setDefaults($.timepicker.regional['de']);
+	// $.timepicker.setDefaults($.timepicker.regional['de']);
 })(jQuery);
