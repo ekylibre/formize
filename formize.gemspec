@@ -20,5 +20,8 @@ Gem::Specification.new do |s|
   add_runtime_dependency = (s.respond_to?(:add_runtime_dependency) ? :add_runtime_dependency : :add_dependency)
   s.send(add_runtime_dependency, "rails", [">= 3.2"])
   s.send(add_runtime_dependency, "jquery-rails", [">= 0"])
+  s.add_development_dependency("coveralls", [">= 0.6"])
+  s.add_development_dependency("rake", [">= 10"])
+  s.add_development_dependency("bundler", [">= 1"])
 end
 
