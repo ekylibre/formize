@@ -8,6 +8,7 @@
 		minuteText: 'Minutt',
 		secondText: 'Sekund',
 		millisecText: 'Millisekund',
+		microsecText: 'mikrosekund',
 		timezoneText: 'Tidssone',
 		currentText: 'Nå',
 		closeText: 'Lukk',
@@ -16,5 +17,5 @@
 		pmNames: ['pm', 'PM', 'P'],
 		isRTL: false
 	};
-	// $.timepicker.setDefaults($.timepicker.regional['no']);
+	$.timepicker.setDefaults($.timepicker.regional['no']);
 })(jQuery);

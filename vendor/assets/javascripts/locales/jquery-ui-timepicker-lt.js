@@ -8,6 +8,7 @@
 		minuteText: 'Minutės',
 		secondText: 'Sekundės',
 		millisecText: 'Milisekundės',
+		microsecText: 'Mikrosekundės',
 		timezoneText: 'Laiko zona',
 		currentText: 'Dabar',
 		closeText: 'Uždaryti',
@@ -16,5 +17,5 @@
 		pmNames: ['popiet', 'PM', 'P'],
 		isRTL: false
 	};
-	// $.timepicker.setDefaults($.timepicker.regional['lt']);
+	$.timepicker.setDefaults($.timepicker.regional['lt']);
 })(jQuery);

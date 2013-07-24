@@ -8,6 +8,7 @@
 		minuteText: "דקות",
 		secondText: "שניות",
 		millisecText: "אלפית השנייה",
+		microsecText: "מיקרו",
 		timezoneText: "אזור זמן",
 		currentText: "עכשיו",
 		closeText:"סגור",
@@ -16,5 +17,5 @@
 		pmNames: ['אחה"צ', 'PM', 'P'],
 		isRTL: true
 	};
-	// $.timepicker.setDefaults($.timepicker.regional["he"]);
+	$.timepicker.setDefaults($.timepicker.regional["he"]);
 })(jQuery);

@@ -8,6 +8,7 @@
 		minuteText: 'Minúty',
 		secondText: 'Sekundy',
 		millisecText: 'Milisekundy',
+		microsecText: 'Mikrosekundy',
 		timezoneText: 'Časové pásmo',
 		currentText: 'Teraz',
 		closeText: 'Zavrieť',
@@ -16,5 +17,5 @@
 		pmNames: ['pop.', 'PM', 'P'],
 		isRTL: false
 	};
-	// $.timepicker.setDefaults($.timepicker.regional['sk']);
+	$.timepicker.setDefaults($.timepicker.regional['sk']);
 })(jQuery);

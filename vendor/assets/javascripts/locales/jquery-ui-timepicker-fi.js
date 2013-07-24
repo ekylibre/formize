@@ -8,6 +8,7 @@
 		minuteText: 'Minuutti',
 		secondText: 'Sekunti',
 		millisecText: 'Millisekunnin',
+		microsecText: 'Mikrosekuntia',
 		timezoneText: 'Aikavyöhyke',
 		currentText: 'Nyt',
 		closeText: 'Sulje',
@@ -16,5 +17,5 @@
 		pmNames: ['ip.', 'PM', 'P'],
 		isRTL: false
 	};
-	// $.timepicker.setDefaults($.timepicker.regional['fi']);
+	$.timepicker.setDefaults($.timepicker.regional['fi']);
 })(jQuery);

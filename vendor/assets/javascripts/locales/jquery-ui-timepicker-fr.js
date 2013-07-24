@@ -8,6 +8,7 @@
 		minuteText: 'Minutes',
 		secondText: 'Secondes',
 		millisecText: 'Millisecondes',
+		microsecText: 'Microsecondes',
 		timezoneText: 'Fuseau horaire',
 		currentText: 'Maintenant',
 		closeText: 'Terminé',
@@ -16,20 +17,5 @@
 		pmNames: ['PM', 'P'],
 		isRTL: false
 	};
-	$.timepicker.regional['fra'] = {
-		timeOnlyTitle: 'Choisir une heure',
-		timeText: 'Heure',
-		hourText: 'Heures',
-		minuteText: 'Minutes',
-		secondText: 'Secondes',
-		millisecText: 'Millisecondes',
-		timezoneText: 'Fuseau horaire',
-		currentText: 'Maintenant',
-		closeText: 'Terminé',
-		timeFormat: 'HH:mm',
-		amNames: ['AM', 'A'],
-		pmNames: ['PM', 'P'],
-		isRTL: false
-	};
-	// $.timepicker.setDefaults($.timepicker.regional['fr']);
+	$.timepicker.setDefaults($.timepicker.regional['fr']);
 })(jQuery);

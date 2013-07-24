@@ -8,6 +8,7 @@
 		minuteText: 'Dakika',
 		secondText: 'Saniye',
 		millisecText: 'Milisaniye',
+		microsecText: 'Mikrosaniye',
 		timezoneText: 'Zaman Dilimi',
 		currentText: 'Şu an',
 		closeText: 'Tamam',
@@ -16,5 +17,5 @@
 		pmNames: ['ÖS', 'S'],
 		isRTL: false
 	};
-	// $.timepicker.setDefaults($.timepicker.regional['tr']);
+	$.timepicker.setDefaults($.timepicker.regional['tr']);
 })(jQuery);

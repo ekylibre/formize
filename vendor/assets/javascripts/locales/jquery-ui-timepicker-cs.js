@@ -8,13 +8,14 @@
 		minuteText: 'Minuty',
 		secondText: 'Vteřiny',
 		millisecText: 'Milisekundy',
+		microsecText: 'Mikrosekundy',
 		timezoneText: 'Časové pásmo',
 		currentText: 'Nyní',
 		closeText: 'Zavřít',
-		timeFormat: 'H:m',
+		timeFormat: 'HH:mm',
 		amNames: ['dop.', 'AM', 'A'],
 		pmNames: ['odp.', 'PM', 'P'],
 		isRTL: false
 	};
-	// $.timepicker.setDefaults($.timepicker.regional['cs']);
+	$.timepicker.setDefaults($.timepicker.regional['cs']);
 })(jQuery);

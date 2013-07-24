@@ -8,6 +8,7 @@
 		minuteText: 'Minute',
 		secondText: 'Sekondes',
 		millisecText: 'Millisekondes',
+		microsecText: 'Mikrosekondes',
 		timezoneText: 'Tydsone',
 		currentText: 'Huidige Tyd',
 		closeText: 'Klaar',
@@ -16,5 +17,5 @@
 		pmNames: ['PM', 'P'],
 		isRTL: false
 	};
-	// $.timepicker.setDefaults($.timepicker.regional['af']);
+	$.timepicker.setDefaults($.timepicker.regional['af']);
 })(jQuery);

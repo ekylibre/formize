@@ -8,6 +8,7 @@
 		minuteText: '분',
 		secondText: '초',
 		millisecText: '밀리초',
+		microsecText: '마이크로',
 		timezoneText: '표준 시간대',
 		currentText: '현재 시각',
 		closeText: '닫기',
@@ -16,5 +17,5 @@
 		pmNames: ['오후', 'PM', 'P'],
 		isRTL: false
 	};
-	// $.timepicker.setDefaults($.timepicker.regional['ko']);
+	$.timepicker.setDefaults($.timepicker.regional['ko']);
 })(jQuery);

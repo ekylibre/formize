@@ -8,6 +8,7 @@
 		minuteText: 'Minutos',
 		secondText: 'Segundos',
 		millisecText: 'Milissegundos',
+		microsecText: 'Microssegundos',
 		timezoneText: 'Fuso horário',
 		currentText: 'Agora',
 		closeText: 'Fechar',
@@ -16,5 +17,5 @@
 		pmNames: ['p.m.', 'PM', 'P'],
 		isRTL: false
 	};
-	// $.timepicker.setDefaults($.timepicker.regional['pt']);
+	$.timepicker.setDefaults($.timepicker.regional['pt']);
 })(jQuery);
