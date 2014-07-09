@@ -1,7 +1,7 @@
 = Formize
 {<img src="https://badge.fury.io/rb/formize.png" alt="Gem Version" />}[http://badge.fury.io/rb/formize]
-{<img src="https://api.travis-ci.org/burisu/formize.png?branch=master"/>}[https://travis-ci.org/burisu/formize]
-{<img src="https://gemnasium.com/burisu/formize.png"/>}[https://gemnasium.com/burisu/formize]
+{<img src="https://api.travis-ci.org/ekylibre/formize.png?branch=master"/>}[https://travis-ci.org/ekylibre/formize]
+{<img src="https://gemnasium.com/ekylibre/formize.png"/>}[https://gemnasium.com/ekylibre/formize]
 
 Form helpers. Will be integrated with SimpleForm.
 
@@ -52,7 +52,7 @@ TODO: Rewrite examples
 === MonoChoice (dynamic selector)
 
 
-== Contributing to Formize {<img src="https://secure.travis-ci.org/burisu/formize.png"/>}[http://travis-ci.org/burisu/formize]
+== Contributing to Formize {<img src="https://secure.travis-ci.org/ekylibre/formize.png"/>}[http://travis-ci.org/ekylibre/formize]
  
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
 * Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
