@@ -23,5 +23,6 @@ Gem::Specification.new do |s|
   s.add_dependency("jquery-ui-rails", ">= 4", "< 5")
   s.add_development_dependency("rake", ">= 10")
   s.add_development_dependency("bundler", ">= 1")
+  s.add_development_dependency("minitest")
 end
 
