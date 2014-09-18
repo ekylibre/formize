@@ -1,9 +1,10 @@
 # encoding: utf-8
+$:.push File.expand_path("../lib", __FILE__)
+require "formize/version"
+
 Gem::Specification.new do |s|
   s.name = "formize"
-  File.open("VERSION", "rb") do |f|
-    s.version = f.read
-  end
+  s.version = Formize::VERSION
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.author = "Brice Texier"
   s.email  = "burisu@oneiros.fr"
