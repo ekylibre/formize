@@ -1,6 +1,6 @@
 = Formize
 {<img src="https://badge.fury.io/rb/formize.png" alt="Gem Version" />}[http://badge.fury.io/rb/formize]
-{<img src="https://api.travis-ci.org/ekylibre/formize.png?branch=master"/>}[https://travis-ci.org/ekylibre/formize]
+{<img src="https://api.travis-ci.org/ekylibre/formize.png?branch=2-1-stable"/>}[https://travis-ci.org/ekylibre/formize]
 {<img src="https://gemnasium.com/ekylibre/formize.png"/>}[https://gemnasium.com/ekylibre/formize]
 
 Form helpers. Will be integrated with SimpleForm.
